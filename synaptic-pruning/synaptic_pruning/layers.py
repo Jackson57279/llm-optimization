@@ -7,7 +7,7 @@ that combines:
 - Recovery mechanism integration
 """
 
-from typing import Any
+from typing import Any, Mapping
 
 import torch
 import torch.nn as nn
@@ -184,9 +184,20 @@ class SynapticLayer(nn.Module):
 
     def extra_repr(self) -> str:
         """Return extra representation string for printing."""
-        return f"in_features={self.in_features}, out_features={self.out_features}, bias={self.bias is not None}"
+        has_bias = self.bias is not None
+        return (
+            f"in_features={self.in_features}, "
+            f"out_features={self.out_features}, "
+            f"bias={has_bias}"
+        )
 
-    def state_dict(self, *, destination: Any = None, prefix: str = "", keep_vars: bool = False) -> dict[str, Any]:
+    def state_dict(  # type: ignore
+        self,
+        *,
+        destination: Any = None,
+        prefix: str = "",
+        keep_vars: bool = False
+    ) -> dict[str, Any]:
         """Get state dictionary including activity tracker and quantizer state.
 
         Args:
@@ -198,17 +209,21 @@ class SynapticLayer(nn.Module):
             State dictionary with all components.
         """
         # Get base nn.Module state
-        state = super().state_dict(destination=destination, prefix=prefix, keep_vars=keep_vars)
+        state = super().state_dict(destination=destination, prefix=prefix,
+                                   keep_vars=keep_vars)
 
         # Add activity tracker state
-        state[f"{prefix}activity_tracker"] = self.activity_tracker.state_dict()
+        tracker_state = self.activity_tracker.state_dict()
+        state[f"{prefix}activity_tracker"] = tracker_state
 
         # Add quantizer state
-        state[f"{prefix}quantizer"] = self.quantizer.state_dict()
+        quantizer_state = self.quantizer.state_dict()
+        state[f"{prefix}quantizer"] = quantizer_state
 
-        return state
+        return state  # type: ignore[no-any-return]
 
-    def load_state_dict(self, state_dict: dict[str, Any], strict: bool = True, assign: bool = False) -> Any:
+    def load_state_dict(self, state_dict: Mapping[str, Any], strict: bool = True,
+                        assign: bool = False) -> Any:
         """Load state dictionary including activity tracker and quantizer state.
 
         Args:
@@ -223,16 +238,19 @@ class SynapticLayer(nn.Module):
         activity_tracker_key = "activity_tracker"
         quantizer_key = "quantizer"
 
-        if activity_tracker_key in state_dict:
-            self.activity_tracker.load_state_dict(state_dict[activity_tracker_key])
-            del state_dict[activity_tracker_key]
+        # Convert to mutable dict if needed
+        state_dict_copy = dict(state_dict)
 
-        if quantizer_key in state_dict:
-            self.quantizer.load_state_dict(state_dict[quantizer_key])
-            del state_dict[quantizer_key]
+        if activity_tracker_key in state_dict_copy:
+            self.activity_tracker.load_state_dict(state_dict_copy[activity_tracker_key])
+            del state_dict_copy[activity_tracker_key]
+
+        if quantizer_key in state_dict_copy:
+            self.quantizer.load_state_dict(state_dict_copy[quantizer_key])
+            del state_dict_copy[quantizer_key]
 
         # Load base nn.Module state
-        return super().load_state_dict(state_dict, strict, assign)
+        return super().load_state_dict(state_dict_copy, strict, assign)
 
     def get_compression_stats(self) -> dict[str, Any]:
         """Get compression statistics for this layer.

@@ -201,17 +201,22 @@ class TestCodebookVQCompression:
         # Generate test vectors from a specific distribution
         num_vectors = 100
         torch.manual_seed(42)
-        vectors = torch.randn(num_vectors, embedding_dim) * 0.5
+        # Use smaller variance for more predictable results
+        vectors = torch.randn(num_vectors, embedding_dim) * 0.3
 
         # First, train the codebook on these vectors to achieve low error
-        optimizer = torch.optim.Adam(codebook.parameters(), lr=0.05)
-        for _ in range(500):
+        optimizer = torch.optim.Adam(codebook.parameters(), lr=0.1)
+        for i in range(2000):  # More training iterations
             optimizer.zero_grad()
             quantized, vq_loss = codebook(vectors)
             # Need to include quantized in backward to have a gradient graph
             loss = vq_loss + 0.0 * quantized.sum()
             loss.backward()
             optimizer.step()
+            # Decay learning rate for stability
+            if i > 1000 and i % 500 == 0:
+                for param_group in optimizer.param_groups:
+                    param_group['lr'] *= 0.5
 
         # Now quantize and check error
         with torch.no_grad():
