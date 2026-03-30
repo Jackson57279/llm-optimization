@@ -10,11 +10,12 @@ Usage:
 
 The script will:
     1. Define a simple model with SynapticLayers
-    2. Set up the trainer with a progressive pruning schedule
-    3. Train the model on synthetic data
-    4. Save the compressed checkpoint
-    5. Load and evaluate the compressed model
-    6. Report final compression statistics
+    2. Create synthetic training data
+    3. Setup the trainer with a progressive pruning schedule
+    4. Train the model on synthetic data
+    5. Save the compressed checkpoint
+    6. Load and evaluate the compressed model
+    7. Report final compression statistics
 """
 
 import os
@@ -208,50 +209,29 @@ def setup_training(
 
 
 # =============================================================================
-# Step 4: Define Loss Function
+# Step 4: Train
 # =============================================================================
 
-def create_loss_function() -> callable:
-    """Create a loss function for training.
-
-    Returns:
-        Loss function that takes (predictions, targets) and returns loss.
-    """
-    # Standard cross-entropy loss for classification
-    # This works exactly the same with SynapticLayers as with nn.Linear
-    criterion = nn.CrossEntropyLoss()
-
-    def loss_fn(predictions: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
-        """Compute cross-entropy loss.
-
-        Args:
-            predictions: Model output logits.
-            targets: Ground truth labels.
-
-        Returns:
-            Scalar loss tensor.
-        """
-        return criterion(predictions, targets)
-
-    return loss_fn
-
-
-# =============================================================================
-# Step 5: Training Loop
-# =============================================================================
+# (Previously there was a loss function creator here, but we use nn.CrossEntropyLoss directly)
 
 def train_model(
+    model: nn.Module,
     trainer: SynapticTrainer,
     train_loader: torch.utils.data.DataLoader,
-    loss_fn: callable,
+    criterion: nn.Module,
     num_epochs: int = 10,
 ) -> dict:
-    """Train the model using SynapticTrainer.
+    """Train the model with progressive pruning.
+
+    This uses a manual training loop for better control over the pruning
+    schedule and compression metrics. The trainer's activity threshold
+    updates are applied at the start of each epoch.
 
     Args:
+        model: The model to train.
         trainer: Configured SynapticTrainer instance.
         train_loader: Training data loader.
-        loss_fn: Loss function.
+        criterion: Loss criterion module.
         num_epochs: Number of epochs to train.
 
     Returns:
@@ -261,24 +241,73 @@ def train_model(
     print("STARTING TRAINING")
     print("=" * 60)
 
-    # Train the model
-    # The trainer handles:
-    # - Forward/backward passes
-    # - Activity tracking updates
-    # - Pruning threshold adjustments
-    # - Compression metrics collection
-    history = trainer.train(
-        train_loader=train_loader,
-        num_epochs=num_epochs,
-        loss_fn=loss_fn,
-        log_interval=5,  # Log every 5 batches
-    )
+    from tqdm import tqdm
+
+    history: dict = {
+        "train_losses": [],
+        "recovery_losses": [],
+        "compression_stats": [],
+    }
+
+    # Training loop with manual control
+    model.train()
+
+    for epoch in range(num_epochs):
+        # Update pruning thresholds based on schedule
+        trainer._update_activity_thresholds(epoch)
+
+        epoch_losses = []
+        pbar = tqdm(train_loader, desc=f"Epoch {epoch+1}/{num_epochs}")
+
+        for batch_idx, (inputs, labels) in enumerate(pbar):
+            # Zero gradients
+            trainer.optimizer.zero_grad()
+
+            # Forward pass
+            outputs = model(inputs)
+            loss = criterion(outputs, labels)
+
+            # Backward pass
+            loss.backward()
+            trainer.optimizer.step()
+
+            epoch_losses.append(loss.item())
+
+            # Update progress bar
+            if batch_idx % 5 == 0:
+                avg_loss = sum(epoch_losses[-5:]) / min(5, len(epoch_losses))
+
+                # Get compression stats
+                stats = trainer._compute_compression_stats()
+                sparsity = stats.get("sparsity", 0.0)
+                compression = stats.get("effective_compression", 1.0)
+
+                pbar.set_postfix({
+                    "loss": f"{avg_loss:.4f}",
+                    "sparsity": f"{sparsity:.2%}",
+                    "compression": f"{compression:.2f}x",
+                })
+
+        # Record epoch statistics
+        avg_epoch_loss = sum(epoch_losses) / len(epoch_losses) if epoch_losses else 0.0
+        history["train_losses"].append(avg_epoch_loss)
+
+        # Record compression stats
+        compression_stats = trainer._compute_compression_stats()
+        history["compression_stats"].append(compression_stats)
+
+        print(
+            f"Epoch {epoch+1} complete: "
+            f"Loss={avg_epoch_loss:.4f}, "
+            f"Sparsity={compression_stats.get('sparsity', 0):.2%}, "
+            f"Compression={compression_stats.get('effective_compression', 1.0):.2f}x"
+        )
 
     return history
 
 
 # =============================================================================
-# Step 6: Save Compressed Model
+# Step 5: Save Compressed Model
 # =============================================================================
 
 def save_checkpoint(
@@ -495,11 +524,12 @@ def main() -> dict:
     print("STEP 4: Training with progressive pruning")
     print("-" * 60)
 
-    loss_fn = create_loss_function()
+    criterion = nn.CrossEntropyLoss()
     history = train_model(
+        model=model,
         trainer=trainer,
         train_loader=train_loader,
-        loss_fn=loss_fn,
+        criterion=criterion,
         num_epochs=NUM_EPOCHS,
     )
 
@@ -521,19 +551,19 @@ def main() -> dict:
     print(f"Effective compression: {final_stats['effective_compression']:.2f}x")
 
     # -------------------------------------------------------------------------
-    # Step 6: Save Checkpoint
+    # Step 5: Save Checkpoint
     # -------------------------------------------------------------------------
     print("\n" + "-" * 60)
-    print("STEP 6: Saving compressed checkpoint")
+    print("STEP 5: Saving compressed checkpoint")
     print("-" * 60)
 
     save_checkpoint(trainer, checkpoint_path)
 
     # -------------------------------------------------------------------------
-    # Step 7: Load and Evaluate
+    # Step 6: Load and Evaluate
     # -------------------------------------------------------------------------
     print("\n" + "-" * 60)
-    print("STEP 7: Loading checkpoint and evaluating")
+    print("STEP 6: Loading checkpoint and evaluating")
     print("-" * 60)
 
     eval_results = load_and_evaluate(

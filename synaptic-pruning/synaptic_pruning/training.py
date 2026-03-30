@@ -594,7 +594,9 @@ class SynapticTrainer:
         """
         checkpoint = torch.load(path, map_location=self.device)
 
-        self.model.load_state_dict(checkpoint["model_state_dict"])
+        # Load model state - use strict=False because SynapticLayer's load_state_dict
+        # removes activity_tracker and quantizer keys, leaving only base nn.Module keys
+        self.model.load_state_dict(checkpoint["model_state_dict"], strict=False)
         self.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
 
         self.recovery_weight = checkpoint.get("recovery_weight", self.recovery_weight)
