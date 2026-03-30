@@ -7,6 +7,7 @@ commands:
   benchmark-perplexity: cd synaptic-pruning && python benchmarks/evaluate_perplexity.py
   benchmark-ablation: cd synaptic-pruning && python benchmarks/ablation_pruning.py
   benchmark-comparison: cd synaptic-pruning && python benchmarks/compare_baselines.py
+  benchmark-task-shift: cd synaptic-pruning && python benchmarks/task_shift_recovery.py
   example: cd synaptic-pruning && python examples/end_to_end_pipeline.py
 
 services: {}

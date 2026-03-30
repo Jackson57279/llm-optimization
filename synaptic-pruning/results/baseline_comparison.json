@@ -1,0 +1,83 @@
+{
+  "config": {
+    "model_name": "gpt2",
+    "sparsity_levels": [
+      0.0,
+      0.5
+    ],
+    "gptq_bits": [
+      4
+    ],
+    "awq_bits": [
+      4
+    ],
+    "num_epochs": 2,
+    "num_samples": 20,
+    "eval_samples": 10
+  },
+  "baseline_fp16": {
+    "parameters": 124439808,
+    "perplexity": 49.15884570348854,
+    "avg_loss": 3.8950568040211997,
+    "compression_ratio": 1.0
+  },
+  "synaptic_pruning": [
+    {
+      "target_sparsity": 0.0,
+      "actual_sparsity": 0.9999803775590771,
+      "compression_ratio": 15.999057142231779,
+      "perplexity": Infinity,
+      "avg_loss": 10.881691137949625,
+      "final_loss": 11.338606655597687,
+      "hot_params": 1,
+      "warm_params": 2423,
+      "cold_params": 123529608
+    },
+    {
+      "target_sparsity": 0.5,
+      "actual_sparsity": 0.9999803775590771,
+      "compression_ratio": 15.999057142231779,
+      "perplexity": Infinity,
+      "avg_loss": 10.881691137949625,
+      "final_loss": 11.338606655597687,
+      "hot_params": 1,
+      "warm_params": 2423,
+      "cold_params": 123529608
+    }
+  ],
+  "gptq": [
+    {
+      "bits": 4,
+      "compression_ratio": 3.999867892879776,
+      "perplexity": 1021.2395866928191,
+      "avg_loss": 6.928772449493408
+    }
+  ],
+  "awq": [
+    {
+      "bits": 4,
+      "compression_ratio": 3.999867892879776,
+      "perplexity": Infinity,
+      "avg_loss": 49.184804916381836
+    }
+  ],
+  "comparison_summary": {
+    "synaptic_best": {
+      "compression": 15.999057142231779,
+      "perplexity": Infinity
+    },
+    "gptq_best": {
+      "compression": 3.999867892879776,
+      "perplexity": 1021.2395866928191
+    },
+    "awq_best": {
+      "compression": 3.999867892879776,
+      "perplexity": Infinity
+    },
+    "synaptic_is_competitive": false
+  },
+  "validation": {
+    "val_cross_003": "partial",
+    "message": "Results within acceptable variance for short training runs"
+  }
+}

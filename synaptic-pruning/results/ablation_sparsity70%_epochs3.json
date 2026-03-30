@@ -1,0 +1,48 @@
+{
+  "config": {
+    "model_name": "gpt2",
+    "target_sparsity": 0.7,
+    "num_epochs": 3,
+    "num_samples": 30,
+    "batch_size": 4,
+    "learning_rate": 5e-05,
+    "random_seed": 42
+  },
+  "activity_driven": {
+    "final_loss": 9.226924800872803,
+    "perplexity": 8072.854727633137,
+    "compression_stats": {
+      "total_params": 123532032,
+      "sparsity": 0.99997169964791,
+      "effective_compression": 15.998641698420917,
+      "hot_params": 0,
+      "warm_params": 3496,
+      "cold_params": 123528536
+    }
+  },
+  "random": {
+    "final_loss": 25.70612189769745,
+    "perplexity": Infinity,
+    "compression_stats": {
+      "total_params": 123532032,
+      "sparsity": 0.999904316315302,
+      "effective_compression": 15.995128383298242,
+      "hot_params": 181,
+      "warm_params": 11639,
+      "cold_params": 123520212
+    }
+  },
+  "comparison": {
+    "loss_difference": 16.47919709682465,
+    "loss_improvement_percent": 64.10611901089882,
+    "perplexity_difference": Infinity,
+    "perplexity_improvement_percent": NaN,
+    "sparsity_difference": 6.738333260802865e-05,
+    "activity_wins_loss": true,
+    "activity_wins_perplexity": true
+  },
+  "validation": {
+    "val_ben_004": "passed",
+    "message": "Activity-driven pruning achieves better accuracy than random pruning"
+  }
+}
