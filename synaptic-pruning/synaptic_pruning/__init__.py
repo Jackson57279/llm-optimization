@@ -18,8 +18,9 @@ from synaptic_pruning.visualization import (
     save_visualization,
 )
 from synaptic_pruning.quantization import TieredQuantizer
+from synaptic_pruning.recovery import HyperNetwork
 
-# from synaptic_pruning.recovery import HyperNetwork, CodebookVQ
+# from synaptic_pruning.recovery import CodebookVQ
 # from synaptic_pruning.layers import SynapticLayer
 # from synaptic_pruning.training import SynapticTrainer
 # from synaptic_pruning.utils import get_compression_stats, visualize_activity
@@ -28,12 +29,12 @@ __all__ = [
     "__version__",
     "EMAActivity",
     "TieredQuantizer",
+    "HyperNetwork",
     "plot_activity_histogram",
     "plot_tier_distribution",
     "plot_layer_heatmap",
     "plot_activity_summary",
     "save_visualization",
-    # "HyperNetwork",
     # "CodebookVQ",
     # "SynapticLayer",
     # "SynapticTrainer",

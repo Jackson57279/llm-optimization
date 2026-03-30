@@ -34,7 +34,42 @@ class HyperNetwork(nn.Module):
             hidden_dim: Hidden layer dimension for generation network.
             target_shape: Shape of weight matrices to generate.
         """
-        raise NotImplementedError("HyperNetwork will be implemented in recovery-hypernetwork")
+        super().__init__()
+        self.latent_dim = latent_dim
+        self.hidden_dim = hidden_dim
+        self.target_shape = target_shape
+
+        # Calculate output size from target shape
+        self.output_size = 1
+        for dim in target_shape:
+            self.output_size *= dim
+
+        # Generation network (latent -> weights)
+        self.generator = nn.Sequential(
+            nn.Linear(latent_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Linear(hidden_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Linear(hidden_dim, self.output_size),
+        )
+
+        # Encoder network (weights -> latent) for training
+        self.encoder = nn.Sequential(
+            nn.Linear(self.output_size, hidden_dim),
+            nn.ReLU(),
+            nn.Linear(hidden_dim, latent_dim),
+        )
+
+        # Initialize weights with small values for stable training
+        self._init_weights()
+
+    def _init_weights(self) -> None:
+        """Initialize weights with small normal distribution."""
+        for module in self.modules():
+            if isinstance(module, nn.Linear):
+                nn.init.normal_(module.weight, std=0.01)
+                if module.bias is not None:
+                    nn.init.zeros_(module.bias)
 
     def forward(self, latent_code: torch.Tensor) -> torch.Tensor:
         """Generate weight matrix from latent code.
@@ -45,18 +80,82 @@ class HyperNetwork(nn.Module):
         Returns:
             Generated weight matrix of target_shape.
         """
-        raise NotImplementedError("HyperNetwork will be implemented in recovery-hypernetwork")
+        # Handle both single latent code [latent_dim] and batched [B, latent_dim]
+        if latent_code.dim() == 1:
+            latent_code = latent_code.unsqueeze(0)
+            squeeze_output = True
+        else:
+            squeeze_output = False
+
+        # Generate flattened weights
+        weights_flat = self.generator(latent_code)
+
+        # Reshape to target shape
+        batch_size = weights_flat.shape[0]
+        if batch_size == 1 and squeeze_output:
+            weights = weights_flat.view(self.target_shape)
+        else:
+            weights = weights_flat.view(batch_size, *self.target_shape)
+
+        return weights
 
     def encode(self, weights: torch.Tensor) -> torch.Tensor:
         """Encode weight matrix to latent code.
 
         Args:
-            weights: Weight matrix to encode.
+            weights: Weight matrix to encode, shape [target_shape] or [B, target_shape].
 
         Returns:
-            Latent code tensor.
+            Latent code tensor of shape [latent_dim] or [B, latent_dim].
         """
-        raise NotImplementedError("HyperNetwork will be implemented in recovery-hypernetwork")
+        # Handle both single and batched weights
+        if weights.dim() == len(self.target_shape):
+            weights = weights.unsqueeze(0)
+            squeeze_output = True
+        else:
+            squeeze_output = False
+
+        # Flatten weights
+        batch_size = weights.shape[0]
+        weights_flat = weights.view(batch_size, self.output_size)
+
+        # Encode to latent space
+        latent = self.encoder(weights_flat)
+
+        if squeeze_output:
+            latent = latent.squeeze(0)
+
+        return latent
+
+    def compute_recovery_loss(
+        self, original_weights: torch.Tensor, latent_code: torch.Tensor
+    ) -> torch.Tensor:
+        """Compute cosine similarity loss for recovery training.
+
+        Args:
+            original_weights: Original weight matrix.
+            latent_code: Latent code used to generate weights.
+
+        Returns:
+            Recovery loss (1 - cosine_similarity).
+        """
+        recovered_weights = self.forward(latent_code)
+
+        # Flatten for cosine similarity computation
+        original_flat = original_weights.view(-1)
+        recovered_flat = recovered_weights.view(-1)
+
+        # Compute cosine similarity
+        cos_sim = nn.functional.cosine_similarity(
+            original_flat.unsqueeze(0),
+            recovered_flat.unsqueeze(0),
+            dim=1,
+        )
+
+        # Loss is 1 - cosine_similarity (we want high similarity)
+        loss = 1.0 - cos_sim.mean()
+
+        return loss
 
 
 class CodebookVQ(nn.Module):
