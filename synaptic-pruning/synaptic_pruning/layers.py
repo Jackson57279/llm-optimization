@@ -4,15 +4,10 @@ Combines activity tracking, tiered quantization, and recovery mechanisms
 into a single unified layer that can replace standard linear layers.
 """
 
-from typing import Optional, Dict, Any, Tuple
+from typing import Any
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-
-from .activity import EMAActivity
-from .quantization import TieredQuantizer
-from .recovery import HyperNetwork, CodebookVQ
 
 
 class SynapticLayer(nn.Module):
@@ -80,7 +75,7 @@ class SynapticLayer(nn.Module):
         """
         raise NotImplementedError("SynapticLayer will be implemented in layer-synaptic-layer")
 
-    def get_compression_stats(self) -> Dict[str, Any]:
+    def get_compression_stats(self) -> dict[str, Any]:
         """Get compression statistics for this layer.
 
         Returns:
@@ -96,7 +91,7 @@ class SynapticLayer(nn.Module):
         """
         raise NotImplementedError("SynapticLayer will be implemented in layer-synaptic-layer")
 
-    def save_state(self) -> Dict[str, Any]:
+    def save_state(self) -> dict[str, Any]:
         """Save layer state including quantized weights.
 
         Returns:
@@ -104,7 +99,7 @@ class SynapticLayer(nn.Module):
         """
         raise NotImplementedError("SynapticLayer will be implemented in layer-synaptic-layer")
 
-    def load_state(self, state_dict: Dict[str, Any]) -> None:
+    def load_state(self, state_dict: dict[str, Any]) -> None:
         """Load layer state from dictionary.
 
         Args:

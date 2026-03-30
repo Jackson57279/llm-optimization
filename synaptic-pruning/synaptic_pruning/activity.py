@@ -4,10 +4,9 @@ This module implements the EMAActivity tracker that monitors per-weight activity
 using exponential moving averages with configurable decay rates.
 """
 
-from typing import Dict, Optional, Tuple
+from typing import Any
 
 import torch
-import torch.nn as nn
 
 
 class EMAActivity:
@@ -58,7 +57,7 @@ class EMAActivity:
         self.decay: float = decay
         self.hot_threshold: float = hot_threshold
         self.warm_threshold: float = warm_threshold
-        self.activity_scores: Dict[str, torch.Tensor] = {}
+        self.activity_scores: dict[str, torch.Tensor] = {}
 
     def update(self, param_name: str, gradients: torch.Tensor) -> None:
         """Update activity scores based on gradient information.
@@ -120,11 +119,12 @@ class EMAActivity:
             KeyError: If param_name has not been registered yet.
         """
         if param_name not in self.activity_scores:
-            raise KeyError(f"Parameter '{param_name}' has not been registered. "
-                          f"Call update() first.")
+            raise KeyError(
+                f"Parameter '{param_name}' has not been registered. " f"Call update() first."
+            )
         return self.activity_scores[param_name]
 
-    def get_tier_mask(self, param_name: str) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    def get_tier_mask(self, param_name: str) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """Get tier classification masks for a parameter.
 
         Tiers are classified based on activity thresholds:
@@ -149,7 +149,7 @@ class EMAActivity:
 
         return hot_mask, warm_mask, cold_mask
 
-    def get_tier_counts(self, param_name: str) -> Tuple[int, int, int]:
+    def get_tier_counts(self, param_name: str) -> tuple[int, int, int]:
         """Get count of weights in each tier.
 
         Args:
@@ -173,7 +173,7 @@ class EMAActivity:
         """Reset all activity scores. Clears the internal state."""
         self.activity_scores.clear()
 
-    def state_dict(self) -> Dict[str, torch.Tensor]:
+    def state_dict(self) -> dict[str, Any]:
         """Get state dictionary for serialization.
 
         Returns:
@@ -186,15 +186,13 @@ class EMAActivity:
             "warm_threshold": torch.tensor(self.warm_threshold),
         }
 
-    def load_state_dict(self, state_dict: Dict[str, torch.Tensor]) -> None:
+    def load_state_dict(self, state_dict: dict[str, Any]) -> None:
         """Load state from dictionary.
 
         Args:
             state_dict: State dictionary from state_dict().
         """
-        self.activity_scores = {
-            k: v for k, v in state_dict["activity_scores"].items()
-        }
+        self.activity_scores = state_dict["activity_scores"]
         self.decay = float(state_dict["decay"].item())
         self.hot_threshold = float(state_dict["hot_threshold"].item())
         self.warm_threshold = float(state_dict["warm_threshold"].item())

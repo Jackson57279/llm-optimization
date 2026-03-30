@@ -5,12 +5,8 @@ across neural network layers. It generates histograms, tier distribution charts,
 and layer heatmaps to help understand and debug activity tracking behavior.
 """
 
-from typing import Dict, List, Optional, Tuple, Union
-
-import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-import seaborn as sns
 import torch
 from matplotlib.figure import Figure
 
@@ -18,12 +14,12 @@ from synaptic_pruning.activity import EMAActivity
 
 
 def plot_activity_histogram(
-    activity_scores: Union[Dict[str, torch.Tensor], EMAActivity],
-    param_names: Optional[List[str]] = None,
+    activity_scores: dict[str, torch.Tensor] | EMAActivity,
+    param_names: list[str] | None = None,
     bins: int = 50,
-    figsize: Tuple[int, int] = (10, 6),
+    figsize: tuple[int, int] = (10, 6),
     title: str = "Activity Score Distribution",
-    ax: Optional[plt.Axes] = None,
+    ax: plt.Axes | None = None,
 ) -> plt.Axes:
     """Plot histogram of activity scores across weights.
 
@@ -89,9 +85,9 @@ def plot_activity_histogram(
         fig, ax = plt.subplots(figsize=figsize)
 
     # Plot histogram
-    ax.hist(all_scores, bins=bins, range=(0, 1), alpha=0.7, edgecolor='black')
-    ax.set_xlabel('Activity Score', fontsize=12)
-    ax.set_ylabel('Count', fontsize=12)
+    ax.hist(all_scores, bins=bins, range=(0, 1), alpha=0.7, edgecolor="black")
+    ax.set_xlabel("Activity Score", fontsize=12)
+    ax.set_ylabel("Count", fontsize=12)
     ax.set_title(title, fontsize=14)
     ax.set_xlim(0, 1)
     ax.grid(True, alpha=0.3)
@@ -99,8 +95,16 @@ def plot_activity_histogram(
     # Add statistics text
     mean_score = np.mean(all_scores)
     median_score = np.median(all_scores)
-    ax.axvline(mean_score, color='red', linestyle='--', linewidth=2, label=f'Mean: {mean_score:.3f}')
-    ax.axvline(median_score, color='green', linestyle='--', linewidth=2, label=f'Median: {median_score:.3f}')
+    ax.axvline(
+        mean_score, color="red", linestyle="--", linewidth=2, label=f"Mean: {mean_score:.3f}"
+    )
+    ax.axvline(
+        median_score,
+        color="green",
+        linestyle="--",
+        linewidth=2,
+        label=f"Median: {median_score:.3f}",
+    )
     ax.legend()
 
     return ax
@@ -108,11 +112,11 @@ def plot_activity_histogram(
 
 def plot_tier_distribution(
     activity_tracker: EMAActivity,
-    param_names: Optional[List[str]] = None,
-    figsize: Tuple[int, int] = (12, 6),
+    param_names: list[str] | None = None,
+    figsize: tuple[int, int] = (12, 6),
     title: str = "Tier Distribution by Layer",
     normalize: bool = True,
-    ax: Optional[plt.Axes] = None,
+    ax: plt.Axes | None = None,
 ) -> plt.Axes:
     """Plot tier distribution (hot/warm/cold) for each tracked layer.
 
@@ -143,9 +147,7 @@ def plot_tier_distribution(
         >>> plt.savefig('tier_distribution.png')
     """
     if not isinstance(activity_tracker, EMAActivity):
-        raise TypeError(
-            f"activity_tracker must be EMAActivity, got {type(activity_tracker)}"
-        )
+        raise TypeError(f"activity_tracker must be EMAActivity, got {type(activity_tracker)}")
 
     if not activity_tracker.activity_scores:
         raise ValueError("No activity scores tracked. Update tracker first.")
@@ -177,12 +179,12 @@ def plot_tier_distribution(
         hot_vals = [h / t * 100 for h, t in zip(hot_counts, total_counts)]
         warm_vals = [w / t * 100 for w, t in zip(warm_counts, total_counts)]
         cold_vals = [c / t * 100 for c, t in zip(cold_counts, total_counts)]
-        ylabel = 'Percentage (%)'
+        ylabel = "Percentage (%)"
     else:
         hot_vals = hot_counts
         warm_vals = warm_counts
         cold_vals = cold_counts
-        ylabel = 'Count'
+        ylabel = "Count"
 
     # Create figure if needed
     if ax is None:
@@ -192,29 +194,39 @@ def plot_tier_distribution(
     x = np.arange(len(params_to_plot))
     width = 0.6
 
-    ax.bar(x, hot_vals, width, label='Hot', color='#ff6b6b', alpha=0.9)
-    ax.bar(x, warm_vals, width, bottom=hot_vals, label='Warm', color='#ffd93d', alpha=0.9)
+    ax.bar(x, hot_vals, width, label="Hot", color="#ff6b6b", alpha=0.9)
+    ax.bar(x, warm_vals, width, bottom=hot_vals, label="Warm", color="#ffd93d", alpha=0.9)
     ax.bar(
-        x, cold_vals, width,
+        x,
+        cold_vals,
+        width,
         bottom=[h + w for h, w in zip(hot_vals, warm_vals)],
-        label='Cold', color='#6bcf7f', alpha=0.9
+        label="Cold",
+        color="#6bcf7f",
+        alpha=0.9,
     )
 
-    ax.set_xlabel('Layer/Parameter', fontsize=12)
+    ax.set_xlabel("Layer/Parameter", fontsize=12)
     ax.set_ylabel(ylabel, fontsize=12)
     ax.set_title(title, fontsize=14)
     ax.set_xticks(x)
-    ax.set_xticklabels([p.replace('.', '\n') for p in params_to_plot], rotation=45, ha='right')
-    ax.legend(loc='upper right')
-    ax.grid(True, alpha=0.3, axis='y')
+    ax.set_xticklabels([p.replace(".", "\n") for p in params_to_plot], rotation=45, ha="right")
+    ax.legend(loc="upper right")
+    ax.grid(True, alpha=0.3, axis="y")
 
     # Add threshold information
     threshold_text = (
         f"Thresholds: Hot>{activity_tracker.hot_threshold}, "
         f"Warm>{activity_tracker.warm_threshold}"
     )
-    ax.text(0.02, 0.98, threshold_text, transform=ax.transAxes,
-            verticalalignment='top', bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
+    ax.text(
+        0.02,
+        0.98,
+        threshold_text,
+        transform=ax.transAxes,
+        verticalalignment="top",
+        bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.5),
+    )
 
     return ax
 
@@ -222,10 +234,10 @@ def plot_tier_distribution(
 def plot_layer_heatmap(
     activity_tracker: EMAActivity,
     param_name: str,
-    figsize: Optional[Tuple[int, int]] = None,
-    cmap: str = 'viridis',
-    title: Optional[str] = None,
-    ax: Optional[plt.Axes] = None,
+    figsize: tuple[int, int] | None = None,
+    cmap: str = "viridis",
+    title: str | None = None,
+    ax: plt.Axes | None = None,
 ) -> plt.Axes:
     """Plot a heatmap of activity scores for a specific layer.
 
@@ -256,9 +268,7 @@ def plot_layer_heatmap(
         >>> plt.savefig('layer_heatmap.png')
     """
     if not isinstance(activity_tracker, EMAActivity):
-        raise TypeError(
-            f"activity_tracker must be EMAActivity, got {type(activity_tracker)}"
-        )
+        raise TypeError(f"activity_tracker must be EMAActivity, got {type(activity_tracker)}")
 
     if param_name not in activity_tracker.activity_scores:
         raise ValueError(
@@ -289,20 +299,26 @@ def plot_layer_heatmap(
         fig, ax = plt.subplots(figsize=figsize)
 
     # Plot heatmap
-    im = ax.imshow(activity, cmap=cmap, aspect='auto', vmin=0, vmax=1)
+    im = ax.imshow(activity, cmap=cmap, aspect="auto", vmin=0, vmax=1)
 
     # Add colorbar
     cbar = plt.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
-    cbar.set_label('Activity Score', fontsize=10)
+    cbar.set_label("Activity Score", fontsize=10)
 
     # Add tier threshold lines on colorbar
     cbar.ax.axhline(
-        activity_tracker.hot_threshold, color='red', linewidth=2,
-        linestyle='--', label='Hot threshold'
+        activity_tracker.hot_threshold,
+        color="red",
+        linewidth=2,
+        linestyle="--",
+        label="Hot threshold",
     )
     cbar.ax.axhline(
-        activity_tracker.warm_threshold, color='yellow', linewidth=2,
-        linestyle='--', label='Warm threshold'
+        activity_tracker.warm_threshold,
+        color="yellow",
+        linewidth=2,
+        linestyle="--",
+        label="Warm threshold",
     )
 
     # Set labels and title
@@ -311,41 +327,50 @@ def plot_layer_heatmap(
     ax.set_title(title, fontsize=14)
 
     if activity.shape[0] == 1:
-        ax.set_xlabel('Weight Index', fontsize=12)
+        ax.set_xlabel("Weight Index", fontsize=12)
         ax.set_yticks([])
     else:
-        ax.set_xlabel('Input Dimension', fontsize=12)
-        ax.set_ylabel('Output Dimension', fontsize=12)
+        ax.set_xlabel("Input Dimension", fontsize=12)
+        ax.set_ylabel("Output Dimension", fontsize=12)
 
     # Add grid overlay for large heatmaps
     if activity.shape[0] <= 50 and activity.shape[1] <= 50:
         ax.set_xticks(np.arange(activity.shape[1]) - 0.5, minor=True)
         ax.set_yticks(np.arange(activity.shape[0]) - 0.5, minor=True)
-        ax.grid(which='minor', color='white', linewidth=0.5, alpha=0.3)
+        ax.grid(which="minor", color="white", linewidth=0.5, alpha=0.3)
 
     # Add statistics
     mean_activity = np.mean(activity)
     hot_pct = np.mean(activity > activity_tracker.hot_threshold) * 100
-    warm_pct = np.mean(
-        (activity > activity_tracker.warm_threshold) &
-        (activity <= activity_tracker.hot_threshold)
-    ) * 100
+    warm_pct = (
+        np.mean(
+            (activity > activity_tracker.warm_threshold)
+            & (activity <= activity_tracker.hot_threshold)
+        )
+        * 100
+    )
     cold_pct = np.mean(activity <= activity_tracker.warm_threshold) * 100
 
     stats_text = (
         f"Mean: {mean_activity:.3f}\n"
         f"Hot: {hot_pct:.1f}% | Warm: {warm_pct:.1f}% | Cold: {cold_pct:.1f}%"
     )
-    ax.text(0.02, 0.98, stats_text, transform=ax.transAxes,
-            verticalalignment='top', bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
+    ax.text(
+        0.02,
+        0.98,
+        stats_text,
+        transform=ax.transAxes,
+        verticalalignment="top",
+        bbox=dict(boxstyle="round", facecolor="white", alpha=0.8),
+    )
 
     return ax
 
 
 def plot_activity_summary(
     activity_tracker: EMAActivity,
-    output_path: Optional[str] = None,
-    figsize: Tuple[int, int] = (16, 10),
+    output_path: str | None = None,
+    figsize: tuple[int, int] = (16, 10),
 ) -> Figure:
     """Create a comprehensive summary figure with all activity visualizations.
 
@@ -372,9 +397,7 @@ def plot_activity_summary(
         >>> fig = plot_activity_summary(tracker, 'summary.png')
     """
     if not isinstance(activity_tracker, EMAActivity):
-        raise TypeError(
-            f"activity_tracker must be EMAActivity, got {type(activity_tracker)}"
-        )
+        raise TypeError(f"activity_tracker must be EMAActivity, got {type(activity_tracker)}")
 
     if not activity_tracker.activity_scores:
         raise ValueError("No activity scores tracked. Update tracker first.")
@@ -398,14 +421,17 @@ def plot_activity_summary(
         col = i % 2
         ax = fig.add_subplot(gs[row, col])
         try:
-            plot_layer_heatmap(
-                activity_tracker, param_name,
-                title=f"{param_name}", ax=ax
-            )
+            plot_layer_heatmap(activity_tracker, param_name, title=f"{param_name}", ax=ax)
         except ValueError:
             # Skip if parameter can't be visualized as heatmap
-            ax.text(0.5, 0.5, f"Cannot visualize\n{param_name}",
-                    ha='center', va='center', transform=ax.transAxes)
+            ax.text(
+                0.5,
+                0.5,
+                f"Cannot visualize\n{param_name}",
+                ha="center",
+                va="center",
+                transform=ax.transAxes,
+            )
             ax.set_title(param_name)
 
     # Add overall title
@@ -413,22 +439,23 @@ def plot_activity_summary(
         f"Activity Summary (decay={activity_tracker.decay}, "
         f"hot>{activity_tracker.hot_threshold}, "
         f"warm>{activity_tracker.warm_threshold})",
-        fontsize=16, y=0.995
+        fontsize=16,
+        y=0.995,
     )
 
     plt.tight_layout()
 
     if output_path is not None:
-        fig.savefig(output_path, dpi=150, bbox_inches='tight')
+        fig.savefig(output_path, dpi=150, bbox_inches="tight")
 
     return fig
 
 
 def save_visualization(
-    ax_or_fig: Union[plt.Axes, Figure],
+    ax_or_fig: plt.Axes | Figure,
     output_path: str,
     dpi: int = 150,
-    bbox_inches: str = 'tight',
+    bbox_inches: str = "tight",
 ) -> None:
     """Save a matplotlib visualization to file.
 
@@ -456,17 +483,13 @@ def save_visualization(
     elif isinstance(ax_or_fig, Figure):
         fig = ax_or_fig
     else:
-        raise TypeError(
-            f"Expected Axes or Figure, got {type(ax_or_fig)}"
-        )
+        raise TypeError(f"Expected Axes or Figure, got {type(ax_or_fig)}")
 
     # Validate output format
-    valid_extensions = ['.png', '.pdf', '.jpg', '.jpeg', '.svg', '.eps', '.tiff', '.tif']
+    valid_extensions = [".png", ".pdf", ".jpg", ".jpeg", ".svg", ".eps", ".tiff", ".tif"]
     output_lower = output_path.lower()
     if not any(output_lower.endswith(ext) for ext in valid_extensions):
-        raise ValueError(
-            f"Unsupported output format. Supported: {', '.join(valid_extensions)}"
-        )
+        raise ValueError(f"Unsupported output format. Supported: {', '.join(valid_extensions)}")
 
     # Save the figure
     fig.savefig(output_path, dpi=dpi, bbox_inches=bbox_inches)
@@ -493,19 +516,19 @@ def _validate_image_file(file_path: str) -> bool:
         return False
 
     # Check file header for PNG
-    if file_path.lower().endswith('.png'):
-        with open(file_path, 'rb') as f:
+    if file_path.lower().endswith(".png"):
+        with open(file_path, "rb") as f:
             header = f.read(8)
             # PNG magic bytes: 89 50 4E 47 0D 0A 1A 0A
-            if header != b'\x89PNG\r\n\x1a\n':
+            if header != b"\x89PNG\r\n\x1a\n":
                 return False
 
     # Check file header for PDF
-    elif file_path.lower().endswith('.pdf'):
-        with open(file_path, 'rb') as f:
+    elif file_path.lower().endswith(".pdf"):
+        with open(file_path, "rb") as f:
             header = f.read(5)
             # PDF starts with %PDF-
-            if not header.startswith(b'%PDF-'):
+            if not header.startswith(b"%PDF-"):
                 return False
 
     return True

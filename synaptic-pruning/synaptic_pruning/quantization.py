@@ -6,10 +6,9 @@ This module implements tiered quantization with multiple precision levels:
 - 1-bit: Binary representation for cold weights
 """
 
-from typing import Optional, Tuple, Dict, Any
+from typing import Any
 
 import torch
-import torch.nn as nn
 
 
 class TieredQuantizer:
@@ -35,7 +34,9 @@ class TieredQuantizer:
             hot_threshold: Minimum activity for FP16 tier.
             warm_threshold: Minimum activity for 4-bit tier.
         """
-        raise NotImplementedError("TieredQuantizer will be implemented in quantization-tiered-quantizer")
+        raise NotImplementedError(
+            "TieredQuantizer will be implemented in quantization-tiered-quantizer"
+        )
 
     def quantize_fp16(self, weights: torch.Tensor) -> torch.Tensor:
         """Keep weights in FP16 (no quantization).
@@ -46,9 +47,13 @@ class TieredQuantizer:
         Returns:
             FP16 weight tensor.
         """
-        raise NotImplementedError("TieredQuantizer will be implemented in quantization-tiered-quantizer")
+        raise NotImplementedError(
+            "TieredQuantizer will be implemented in quantization-tiered-quantizer"
+        )
 
-    def quantize_4bit(self, weights: torch.Tensor, scale: Optional[torch.Tensor] = None) -> Tuple[torch.Tensor, torch.Tensor]:
+    def quantize_4bit(
+        self, weights: torch.Tensor, scale: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         """Quantize weights to 4-bit representation.
 
         Uses symmetric quantization with learned or computed scales.
@@ -60,7 +65,9 @@ class TieredQuantizer:
         Returns:
             Tuple of (quantized_weights, scale).
         """
-        raise NotImplementedError("TieredQuantizer will be implemented in quantization-tiered-quantizer")
+        raise NotImplementedError(
+            "TieredQuantizer will be implemented in quantization-tiered-quantizer"
+        )
 
     def dequantize_4bit(self, quantized: torch.Tensor, scale: torch.Tensor) -> torch.Tensor:
         """Dequantize 4-bit weights back to FP16.
@@ -72,9 +79,13 @@ class TieredQuantizer:
         Returns:
             Dequantized FP16 weights.
         """
-        raise NotImplementedError("TieredQuantizer will be implemented in quantization-tiered-quantizer")
+        raise NotImplementedError(
+            "TieredQuantizer will be implemented in quantization-tiered-quantizer"
+        )
 
-    def quantize_1bit(self, weights: torch.Tensor, scale: Optional[torch.Tensor] = None) -> Tuple[torch.Tensor, torch.Tensor]:
+    def quantize_1bit(
+        self, weights: torch.Tensor, scale: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         """Quantize weights to 1-bit (binary) representation.
 
         Produces values in {-scale, +scale}.
@@ -86,7 +97,9 @@ class TieredQuantizer:
         Returns:
             Tuple of (quantized_weights, scale).
         """
-        raise NotImplementedError("TieredQuantizer will be implemented in quantization-tiered-quantizer")
+        raise NotImplementedError(
+            "TieredQuantizer will be implemented in quantization-tiered-quantizer"
+        )
 
     def dequantize_1bit(self, quantized: torch.Tensor, scale: torch.Tensor) -> torch.Tensor:
         """Dequantize 1-bit weights back to FP16.
@@ -98,13 +111,15 @@ class TieredQuantizer:
         Returns:
             Dequantized FP16 weights.
         """
-        raise NotImplementedError("TieredQuantizer will be implemented in quantization-tiered-quantizer")
+        raise NotImplementedError(
+            "TieredQuantizer will be implemented in quantization-tiered-quantizer"
+        )
 
     def apply_tiered_quantization(
         self,
         weights: torch.Tensor,
         activity: torch.Tensor,
-    ) -> Tuple[torch.Tensor, Dict[str, Any]]:
+    ) -> tuple[torch.Tensor, dict[str, Any]]:
         """Apply tiered quantization based on activity scores.
 
         Args:
@@ -114,4 +129,6 @@ class TieredQuantizer:
         Returns:
             Tuple of (quantized_weights, metadata).
         """
-        raise NotImplementedError("TieredQuantizer will be implemented in quantization-tiered-quantizer")
+        raise NotImplementedError(
+            "TieredQuantizer will be implemented in quantization-tiered-quantizer"
+        )

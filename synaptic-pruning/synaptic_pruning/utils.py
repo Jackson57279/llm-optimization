@@ -3,13 +3,13 @@
 Visualization, metrics, and helper functions.
 """
 
-from typing import Dict, Any, List, Optional, Tuple
+from typing import Any
 
 import torch
 import torch.nn as nn
 
 
-def get_compression_stats(model: nn.Module) -> Dict[str, Any]:
+def get_compression_stats(model: nn.Module) -> dict[str, Any]:
     """Calculate compression statistics for a model.
 
     Computes:
@@ -28,7 +28,7 @@ def get_compression_stats(model: nn.Module) -> Dict[str, Any]:
 
 def visualize_activity(
     activity_scores: torch.Tensor,
-    save_path: Optional[str] = None,
+    save_path: str | None = None,
     title: str = "Activity Distribution",
 ) -> None:
     """Visualize activity scores as histogram.
@@ -38,12 +38,14 @@ def visualize_activity(
         save_path: Optional path to save figure.
         title: Plot title.
     """
-    raise NotImplementedError("visualize_activity will be implemented in foundation-activity-visualization")
+    raise NotImplementedError(
+        "visualize_activity will be implemented in foundation-activity-visualization"
+    )
 
 
 def plot_tier_distribution(
-    tier_counts: Dict[str, Tuple[int, int, int]],
-    save_path: Optional[str] = None,
+    tier_counts: dict[str, tuple[int, int, int]],
+    save_path: str | None = None,
 ) -> None:
     """Plot tier distribution across layers.
 
@@ -51,13 +53,15 @@ def plot_tier_distribution(
         tier_counts: Dictionary mapping layer names to (hot, warm, cold) counts.
         save_path: Optional path to save figure.
     """
-    raise NotImplementedError("plot_tier_distribution will be implemented in foundation-activity-visualization")
+    raise NotImplementedError(
+        "plot_tier_distribution will be implemented in foundation-activity-visualization"
+    )
 
 
 def plot_layer_heatmap(
     activity_scores: torch.Tensor,
     layer_name: str = "layer",
-    save_path: Optional[str] = None,
+    save_path: str | None = None,
 ) -> None:
     """Plot activity heatmap for a layer's weights.
 
@@ -66,13 +70,12 @@ def plot_layer_heatmap(
         layer_name: Name of the layer for title.
         save_path: Optional path to save figure.
     """
-    raise NotImplementedError("plot_layer_heatmap will be implemented in foundation-activity-visualization")
+    raise NotImplementedError(
+        "plot_layer_heatmap will be implemented in foundation-activity-visualization"
+    )
 
 
-def replace_linear_with_synaptic(
-    model: nn.Module,
-    **synaptic_kwargs
-) -> nn.Module:
+def replace_linear_with_synaptic(model: nn.Module, **synaptic_kwargs) -> nn.Module:
     """Replace all nn.Linear layers with SynapticLayers.
 
     Args:
@@ -82,7 +85,9 @@ def replace_linear_with_synaptic(
     Returns:
         Modified model.
     """
-    raise NotImplementedError("replace_linear_with_synaptic will be implemented in layer-synaptic-layer")
+    raise NotImplementedError(
+        "replace_linear_with_synaptic will be implemented in layer-synaptic-layer"
+    )
 
 
 def calculate_sparsity(tensor: torch.Tensor) -> float:
@@ -94,4 +99,6 @@ def calculate_sparsity(tensor: torch.Tensor) -> float:
     Returns:
         Fraction of values near zero.
     """
-    raise NotImplementedError("calculate_sparsity will be implemented with quantization-tiered-quantizer")
+    raise NotImplementedError(
+        "calculate_sparsity will be implemented with quantization-tiered-quantizer"
+    )

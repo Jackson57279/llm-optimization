@@ -4,14 +4,11 @@ Implements SynapticTrainer for end-to-end training with progressive pruning
 and recovery training.
 """
 
-from typing import Optional, Dict, Any, List, Callable
+from typing import Any
 
-import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
-
-from .layers import SynapticLayer
 
 
 class SynapticTrainer:
@@ -34,7 +31,7 @@ class SynapticTrainer:
         self,
         model: nn.Module,
         optimizer: optim.Optimizer,
-        config: Optional[Dict[str, Any]] = None,
+        config: dict[str, Any] | None = None,
     ) -> None:
         """Initialize SynapticTrainer.
 
@@ -43,9 +40,11 @@ class SynapticTrainer:
             optimizer: Optimizer for parameter updates.
             config: Training configuration.
         """
-        raise NotImplementedError("SynapticTrainer will be implemented in training-synaptic-trainer")
+        raise NotImplementedError(
+            "SynapticTrainer will be implemented in training-synaptic-trainer"
+        )
 
-    def train_epoch(self, dataloader: DataLoader, epoch: int) -> Dict[str, float]:
+    def train_epoch(self, dataloader: DataLoader, epoch: int) -> dict[str, float]:
         """Train for one epoch.
 
         Args:
@@ -55,9 +54,11 @@ class SynapticTrainer:
         Returns:
             Dictionary of training metrics.
         """
-        raise NotImplementedError("SynapticTrainer will be implemented in training-synaptic-trainer")
+        raise NotImplementedError(
+            "SynapticTrainer will be implemented in training-synaptic-trainer"
+        )
 
-    def train(self, dataloader: DataLoader, num_epochs: int) -> List[Dict[str, float]]:
+    def train(self, dataloader: DataLoader, num_epochs: int) -> list[dict[str, float]]:
         """Train for multiple epochs.
 
         Args:
@@ -67,9 +68,11 @@ class SynapticTrainer:
         Returns:
             List of metrics dictionaries per epoch.
         """
-        raise NotImplementedError("SynapticTrainer will be implemented in training-synaptic-trainer")
+        raise NotImplementedError(
+            "SynapticTrainer will be implemented in training-synaptic-trainer"
+        )
 
-    def evaluate(self, dataloader: DataLoader) -> Dict[str, float]:
+    def evaluate(self, dataloader: DataLoader) -> dict[str, float]:
         """Evaluate model on validation data.
 
         Args:
@@ -78,15 +81,19 @@ class SynapticTrainer:
         Returns:
             Dictionary of evaluation metrics.
         """
-        raise NotImplementedError("SynapticTrainer will be implemented in training-synaptic-trainer")
+        raise NotImplementedError(
+            "SynapticTrainer will be implemented in training-synaptic-trainer"
+        )
 
-    def get_compression_stats(self) -> Dict[str, Any]:
+    def get_compression_stats(self) -> dict[str, Any]:
         """Get current compression statistics.
 
         Returns:
             Dictionary with compression metrics across all layers.
         """
-        raise NotImplementedError("SynapticTrainer will be implemented in training-synaptic-trainer")
+        raise NotImplementedError(
+            "SynapticTrainer will be implemented in training-synaptic-trainer"
+        )
 
     def save_checkpoint(self, path: str, epoch: int, **kwargs) -> None:
         """Save training checkpoint.
@@ -96,9 +103,11 @@ class SynapticTrainer:
             epoch: Current epoch number.
             **kwargs: Additional data to save.
         """
-        raise NotImplementedError("SynapticTrainer will be implemented in training-synaptic-trainer")
+        raise NotImplementedError(
+            "SynapticTrainer will be implemented in training-synaptic-trainer"
+        )
 
-    def load_checkpoint(self, path: str) -> Dict[str, Any]:
+    def load_checkpoint(self, path: str) -> dict[str, Any]:
         """Load training checkpoint.
 
         Args:
@@ -107,4 +116,6 @@ class SynapticTrainer:
         Returns:
             Checkpoint dictionary.
         """
-        raise NotImplementedError("SynapticTrainer will be implemented in training-synaptic-trainer")
+        raise NotImplementedError(
+            "SynapticTrainer will be implemented in training-synaptic-trainer"
+        )

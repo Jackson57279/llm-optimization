@@ -5,8 +5,6 @@ This module implements learned recovery systems for "pruned" (quantized) weights
 - CodebookVQ: Vector quantization with learned codebook for compression
 """
 
-from typing import Optional, Tuple
-
 import torch
 import torch.nn as nn
 
@@ -27,7 +25,7 @@ class HyperNetwork(nn.Module):
         self,
         latent_dim: int = 64,
         hidden_dim: int = 256,
-        target_shape: Tuple[int, ...] = (768, 768),
+        target_shape: tuple[int, ...] = (768, 768),
     ) -> None:
         """Initialize HyperNetwork.
 
@@ -88,7 +86,7 @@ class CodebookVQ(nn.Module):
         """
         raise NotImplementedError("CodebookVQ will be implemented in recovery-codebook-vq")
 
-    def quantize(self, weights: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+    def quantize(self, weights: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """Quantize weight vectors using codebook.
 
         Args:
@@ -110,7 +108,7 @@ class CodebookVQ(nn.Module):
         """
         raise NotImplementedError("CodebookVQ will be implemented in recovery-codebook-vq")
 
-    def forward(self, weights: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+    def forward(self, weights: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """Forward pass with quantization and straight-through estimator.
 
         Args:

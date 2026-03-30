@@ -10,7 +10,6 @@ import tempfile
 
 import matplotlib
 import matplotlib.pyplot as plt
-import numpy as np
 import pytest
 import torch
 from matplotlib.axes import Axes
@@ -18,16 +17,16 @@ from matplotlib.figure import Figure
 
 from synaptic_pruning import EMAActivity
 from synaptic_pruning.visualization import (
+    _validate_image_file,
     plot_activity_histogram,
+    plot_activity_summary,
     plot_layer_heatmap,
     plot_tier_distribution,
-    plot_activity_summary,
     save_visualization,
-    _validate_image_file,
 )
 
 # Use non-interactive backend for testing
-matplotlib.use('Agg')
+matplotlib.use("Agg")
 
 
 @pytest.fixture
@@ -180,10 +179,7 @@ class TestPlotTierDistribution:
 
     def test_param_filtering(self, sample_tracker):
         """Test filtering by parameter names."""
-        ax = plot_tier_distribution(
-            sample_tracker,
-            param_names=["layer1.weight", "layer2.weight"]
-        )
+        ax = plot_tier_distribution(sample_tracker, param_names=["layer1.weight", "layer2.weight"])
         assert isinstance(ax, Axes)
 
     def test_invalid_param_names_raises(self, sample_tracker):
@@ -248,10 +244,7 @@ class TestPlotLayerHeatmap:
 
     def test_custom_title(self, sample_tracker):
         """Test custom title."""
-        ax = plot_layer_heatmap(
-            sample_tracker, "layer1.weight",
-            title="Custom Heatmap Title"
-        )
+        ax = plot_layer_heatmap(sample_tracker, "layer1.weight", title="Custom Heatmap Title")
         assert ax.get_title() == "Custom Heatmap Title"
 
     def test_default_title(self, sample_tracker):
@@ -570,7 +563,6 @@ class TestEdgeCases:
     def test_partial_param_filtering(self, sample_tracker):
         """Test filtering with some valid and some invalid param names."""
         ax = plot_tier_distribution(
-            sample_tracker,
-            param_names=["layer1.weight", "nonexistent.weight", "layer2.weight"]
+            sample_tracker, param_names=["layer1.weight", "nonexistent.weight", "layer2.weight"]
         )
         assert isinstance(ax, Axes)

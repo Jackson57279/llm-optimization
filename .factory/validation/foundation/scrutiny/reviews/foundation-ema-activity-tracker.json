@@ -1,0 +1,25 @@
+{
+  "featureId": "foundation-ema-activity-tracker",
+  "status": "pass",
+  "reviewedAt": "2026-03-30T00:00:00Z",
+  "reviewer": "scrutiny-validator",
+  "issues": [],
+  "sharedStateObservations": [
+    {
+      "type": "pattern",
+      "description": "EMAActivity uses gradient-based activity tracking with configurable decay",
+      "location": "synaptic_pruning/activity.py"
+    },
+    {
+      "type": "convention",
+      "description": "Tier classification uses strict inequality (>) for hot threshold, not (>=)",
+      "location": "EMAActivity.get_tier_mask()"
+    },
+    {
+      "type": "pattern",
+      "description": "State serialization uses dict[str, Any] to handle mixed tensor/float types",
+      "location": "state_dict(), load_state_dict()"
+    }
+  ],
+  "salientSummary": "EMAActivity tracker correctly implements EMA decay (VAL-ACT-001), tier classification (VAL-ACT-002), and state management. Comprehensive 91% test coverage validates all edge cases."
+}
