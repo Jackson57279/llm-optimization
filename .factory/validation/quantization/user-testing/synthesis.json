@@ -1,0 +1,16 @@
+{
+  "milestone": "quantization",
+  "round": 1,
+  "status": "pass",
+  "assertionsSummary": {
+    "total": 4,
+    "passed": 4,
+    "failed": 0,
+    "blocked": 0
+  },
+  "passedAssertions": ["VAL-QNT-001", "VAL-QNT-002", "VAL-QNT-003", "VAL-QNT-004"],
+  "failedAssertions": [],
+  "blockedAssertions": [],
+  "appliedUpdates": [],
+  "previousRound": null
+}
