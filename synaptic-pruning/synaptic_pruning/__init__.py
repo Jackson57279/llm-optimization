@@ -1,4 +1,4 @@
-"""
+""" 
 Synaptic Pruning: Activity-Driven Sparse Quantization with Learned Recovery.
 
 A novel neural network compression framework that achieves extreme compression
@@ -10,6 +10,13 @@ __version__ = "0.1.0"
 
 # Main components
 from synaptic_pruning.activity import EMAActivity
+from synaptic_pruning.visualization import (
+    plot_activity_histogram,
+    plot_tier_distribution,
+    plot_layer_heatmap,
+    plot_activity_summary,
+    save_visualization,
+)
 # from synaptic_pruning.quantization import TieredQuantizer
 # from synaptic_pruning.recovery import HyperNetwork, CodebookVQ
 # from synaptic_pruning.layers import SynapticLayer
@@ -19,6 +26,11 @@ from synaptic_pruning.activity import EMAActivity
 __all__ = [
     "__version__",
     "EMAActivity",
+    "plot_activity_histogram",
+    "plot_tier_distribution",
+    "plot_layer_heatmap",
+    "plot_activity_summary",
+    "save_visualization",
     # "TieredQuantizer",
     # "HyperNetwork",
     # "CodebookVQ",
