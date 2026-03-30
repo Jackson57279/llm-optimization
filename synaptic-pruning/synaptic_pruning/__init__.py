@@ -8,8 +8,8 @@ recovery mechanism.
 
 __version__ = "0.1.0"
 
-# Main components will be imported here once implemented
-# from synaptic_pruning.activity import EMAActivity
+# Main components
+from synaptic_pruning.activity import EMAActivity
 # from synaptic_pruning.quantization import TieredQuantizer
 # from synaptic_pruning.recovery import HyperNetwork, CodebookVQ
 # from synaptic_pruning.layers import SynapticLayer
@@ -18,7 +18,7 @@ __version__ = "0.1.0"
 
 __all__ = [
     "__version__",
-    # "EMAActivity",
+    "EMAActivity",
     # "TieredQuantizer",
     # "HyperNetwork",
     # "CodebookVQ",
