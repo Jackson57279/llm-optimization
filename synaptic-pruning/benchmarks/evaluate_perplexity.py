@@ -129,8 +129,26 @@ def load_model_from_checkpoint(
     # Replace Conv1D/Linear layers with SynapticLayers
     replace_conv1d_with_synaptic(model)
 
-    # Load state dict
-    model.load_state_dict(checkpoint["model_state_dict"])
+    # Load state dict - use strict=False because the checkpoint contains
+    # SynapticLayer-specific keys (activity_tracker, quantizer) that will be
+    # initialized fresh for evaluation. This is expected behavior.
+    missing_keys, unexpected_keys = model.load_state_dict(
+        checkpoint["model_state_dict"], strict=False
+    )
+    
+    # Log any state dict mismatches for debugging
+    if missing_keys:
+        print(f"Warning: Missing keys in checkpoint: {missing_keys}")
+    if unexpected_keys:
+        # Filter out expected SynapticLayer-specific keys (activity_tracker, quantizer)
+        synaptic_keys = [k for k in unexpected_keys if 'activity_tracker' in k or 'quantizer' in k]
+        other_keys = [k for k in unexpected_keys if 'activity_tracker' not in k and 'quantizer' not in k]
+        if synaptic_keys:
+            print(f"Info: Ignoring {len(synaptic_keys)} SynapticLayer-specific keys "
+                  f"(activity_tracker/quantizer will use fresh initialization)")
+        if other_keys:
+            print(f"Warning: Unexpected keys in checkpoint: {other_keys}")
+    
     model = model.to(device)
     model.eval()
 
