@@ -1,0 +1,19 @@
+{
+  "milestone": "foundation",
+  "assertions": ["VAL-ACT-001", "VAL-ACT-002", "VAL-ACT-003"],
+  "surface": "pytest",
+  "tool": "pytest",
+  "status": "pass",
+  "passedAssertions": ["VAL-ACT-001", "VAL-ACT-002", "VAL-ACT-003"],
+  "failedAssertions": [],
+  "blockedAssertions": [],
+  "frictions": [],
+  "blockers": [],
+  "toolsUsed": ["pytest"],
+  "evidence": {
+    "VAL-ACT-001": "test_ema_decay_curve_single_weight PASSED",
+    "VAL-ACT-002": "test_tier_classification_basic PASSED",
+    "VAL-ACT-003": "test_save_axes_to_png PASSED, test_save_axes_to_pdf PASSED, test_valid_png PASSED, test_valid_pdf PASSED"
+  },
+  "completedAt": "2026-03-30"
+}
