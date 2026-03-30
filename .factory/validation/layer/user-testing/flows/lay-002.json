@@ -1,0 +1,29 @@
+{
+  "assertionId": "VAL-LAY-002",
+  "status": "pass",
+  "reason": "All gradient flow tests passed successfully - gradients flow through all weight tiers including quantized weights via STE",
+  "testResults": [
+    {
+      "testName": "TestSynapticLayerBackwardPass::test_gradients_flow_to_weights",
+      "passed": true,
+      "output": "PASSED - Weight gradients exist and are non-zero"
+    },
+    {
+      "testName": "TestSynapticLayerBackwardPass::test_gradients_flow_to_bias",
+      "passed": true,
+      "output": "PASSED - Bias gradients exist and are non-zero"
+    },
+    {
+      "testName": "TestSynapticLayerBackwardPass::test_gradients_flow_to_input",
+      "passed": true,
+      "output": "PASSED - Input gradients exist and are non-zero"
+    },
+    {
+      "testName": "TestSynapticLayerBackwardPass::test_gradients_with_quantized_weights",
+      "passed": true,
+      "output": "PASSED - Gradients flow through quantized weights via Straight-Through Estimator (STE)"
+    }
+  ],
+  "frictions": [],
+  "toolsUsed": ["pytest"]
+}

@@ -53,21 +53,30 @@ pytest tests/test_quantization.py::Test4BitQuantization::test_4bit_round_trip_er
 - VAL-QNT-003: Tier assignment -> test_tier_assignment_hot_is_fp16, test_tier_assignment_warm_is_4bit, test_tier_assignment_cold_is_1bit
 - VAL-QNT-004: Gradient flow -> test_4bit_gradient_flow, test_1bit_gradient_flow, test_tiered_quantization_gradient_flow
 
-## Recovery Assertion Mapping (VAL-REC-*)
+## Layer Assertion Mapping (VAL-LAY-*)
 
-### VAL-REC-001: HyperNetwork Generates Valid Weights
-- `test_hyper_network.py::TestHyperNetwork::test_forward_single_latent`
-- `test_hyper_network.py::TestHyperNetwork::test_forward_batched_latent`
-- `test_hyper_network.py::TestHyperNetwork::test_encode_single_weight`
-- `test_hyper_network.py::TestHyperNetwork::test_encode_batched_weights`
+### VAL-LAY-001: SynapticLayer produces correct output shape
+- `test_layer.py::TestSynapticLayerForwardPass::test_forward_output_shape_2d`
+- `test_layer.py::TestSynapticLayerForwardPass::test_forward_output_shape_1d`
+- `test_layer.py::TestSynapticLayerForwardPass::test_forward_output_shape_3d`
+- `test_layer.py::TestSynapticLayerForwardPass::test_forward_without_bias`
+- `test_layer.py::TestSynapticLayerForwardPass::test_forward_with_bias`
 
-### VAL-REC-002: Recovery Cosine Similarity > 80%
-- `test_hyper_network.py::TestHyperNetwork::test_cosine_similarity_improvement`
-- `test_hyper_network.py::TestHyperNetwork::test_recovery_loss_computation`
-- `test_hyper_network.py::TestHyperNetwork::test_recovery_loss_range`
+### VAL-LAY-002: Gradients flow through all active weight tiers
+- `test_layer.py::TestSynapticLayerBackwardPass::test_gradients_flow_to_weights`
+- `test_layer.py::TestSynapticLayerBackwardPass::test_gradients_flow_to_bias`
+- `test_layer.py::TestSynapticLayerBackwardPass::test_gradients_flow_to_input`
+- `test_layer.py::TestSynapticLayerBackwardPass::test_gradients_with_quantized_weights`
 
-### VAL-REC-003: CodebookVQ with 256-entry codebook, STE, VQ loss
-- `test_codebook.py::TestCodebookVQ::test_codebook_has_256_entries`
-- `test_codebook.py::TestCodebookVQ::test_vq_loss_computation`
-- `test_codebook.py::TestCodebookVQ::test_straight_through_estimator`
-- `test_codebook.py::TestCodebookVQ::test_quantize_dequantize_roundtrip`
+### VAL-LAY-003: State save and load works correctly
+- `test_layer.py::TestSynapticLayerStateManagement::test_state_dict_contains_all_components`
+- `test_layer.py::TestSynapticLayerStateManagement::test_load_state_dict_restores_weights`
+- `test_layer.py::TestSynapticLayerStateManagement::test_load_state_dict_restores_activity`
+- `test_layer.py::TestSynapticLayerStateManagement::test_save_load_produces_same_output`
+
+### VAL-LAY-004: Drop-in nn.Linear replacement compatibility
+- `test_layer.py::TestSynapticLayerNNLinearCompatibility::test_same_constructor_signature`
+- `test_layer.py::TestSynapticLayerNNLinearCompatibility::test_same_forward_interface`
+- `test_layer.py::TestSynapticLayerNNLinearCompatibility::test_swappable_in_model`
+- `test_layer.py::TestSynapticLayerNNLinearCompatibility::test_has_weight_attribute`
+- `test_layer.py::TestSynapticLayerNNLinearCompatibility::test_has_bias_attribute`

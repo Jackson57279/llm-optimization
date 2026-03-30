@@ -1,0 +1,29 @@
+{
+  "assertionId": "VAL-LAY-003",
+  "status": "pass",
+  "reason": "State save and load works correctly - weights, activity scores, and tier assignments are preserved",
+  "testResults": [
+    {
+      "testName": "TestSynapticLayerStateManagement::test_state_dict_contains_all_components",
+      "passed": true,
+      "output": "PASSED - State dict contains weight, bias, activity_tracker, and quantizer state"
+    },
+    {
+      "testName": "TestSynapticLayerStateManagement::test_load_state_dict_restores_weights",
+      "passed": true,
+      "output": "PASSED - Loading state restores weights correctly"
+    },
+    {
+      "testName": "TestSynapticLayerStateManagement::test_load_state_dict_restores_activity",
+      "passed": true,
+      "output": "PASSED - Loading state restores activity scores correctly"
+    },
+    {
+      "testName": "TestSynapticLayerStateManagement::test_save_load_produces_same_output",
+      "passed": true,
+      "output": "PASSED - Same input produces same output after save/load cycle"
+    }
+  ],
+  "frictions": [],
+  "toolsUsed": ["pytest"]
+}

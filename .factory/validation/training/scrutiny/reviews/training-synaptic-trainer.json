@@ -1,0 +1,47 @@
+{
+  "featureId": "training-synaptic-trainer",
+  "status": "pass",
+  "blockingIssues": [],
+  "nonBlockingIssues": [
+    {
+      "severity": "non_blocking",
+      "category": "design",
+      "description": "Recovery network does not have a separate optimizer. The recovery network parameters are not added to the main optimizer, so they won't receive updates during training. This means the recovery loss contributes to gradients for the main model but the recovery network itself is not trained.",
+      "location": "synaptic_pruning/training.py:182",
+      "suggestion": "Consider adding a separate optimizer for the recovery network or include its parameters in the main optimizer."
+    },
+    {
+      "severity": "non_blocking",
+      "category": "robustness",
+      "description": "Silent exception handling in _compute_recovery_loss may mask bugs. ValueError and RuntimeError are caught and silently skipped.",
+      "location": "synaptic_pruning/training.py:274-278",
+      "suggestion": "Consider logging skipped cases or handling specific error conditions more explicitly."
+    },
+    {
+      "severity": "non_blocking",
+      "category": "test_quality",
+      "description": "Test test_recovery_network_receives_gradients is incomplete. It tracks forward calls but doesn't verify gradients actually flow to recovery network parameters.",
+      "location": "tests/test_training.py:428-460",
+      "suggestion": "Add assertions checking recovery network parameter gradients after backward pass."
+    },
+    {
+      "severity": "non_blocking",
+      "category": "code_style",
+      "description": "The train method is monolithic (~100 lines). Could be broken into smaller methods for better maintainability.",
+      "location": "synaptic_pruning/training.py:357-449",
+      "suggestion": "Consider extracting epoch loop, validation, and callback logic into separate methods."
+    }
+  ],
+  "sharedStateObservations": [
+    {
+      "category": "pattern",
+      "description": "Consistent pattern of importing SynapticLayer inside methods to avoid circular imports. This pattern is used across multiple modules (training.py, layer.py).",
+      "affects": ["training", "layer"]
+    },
+    {
+      "category": "library",
+      "description": "Activity threshold adjustment uses a simple linear heuristic (0.3 + sparsity * 0.6). This is a magic formula that may need tuning for different models.",
+      "suggestion": "Document this heuristic in the library or make it configurable."
+    }
+  ]
+}

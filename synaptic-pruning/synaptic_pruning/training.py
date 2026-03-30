@@ -6,11 +6,14 @@ This module implements the SynapticTrainer for end-to-end training with:
 - Compression metrics tracking
 """
 
-from typing import Any, Callable, Literal
+from typing import TYPE_CHECKING, Any, Callable, Literal
 
 import torch
 import torch.nn as nn
 from torch.optim import Optimizer
+
+if TYPE_CHECKING:
+    from synaptic_pruning.recovery import HyperNetwork
 
 
 class PruningSchedule:
@@ -144,7 +147,7 @@ class SynapticTrainer:
         optimizer: Optimizer,
         pruning_schedule: PruningSchedule | None = None,
         recovery_weight: float = 0.01,
-        recovery_network: nn.Module | None = None,
+        recovery_network: "HyperNetwork | None" = None,
         compression_update_freq: int = 100,
         device: torch.device | str | None = None,
     ) -> None:
@@ -232,7 +235,7 @@ class SynapticTrainer:
             # At 0% sparsity: use warm_threshold = 0.3 (default)
             # At 100% sparsity: use warm_threshold = 0.9
             new_threshold = 0.3 + target_sparsity * 0.6
-            layer.activity_tracker.warm_threshold = new_threshold
+            layer.activity_tracker.warm_threshold = new_threshold  # type: ignore
 
     def _compute_recovery_loss(self) -> torch.Tensor:
         """Compute recovery loss for all SynapticLayers.
@@ -244,6 +247,9 @@ class SynapticTrainer:
             return torch.tensor(0.0, device=self.device)
 
         from synaptic_pruning.layers import SynapticLayer
+
+        recovery_net = self.recovery_network
+        assert recovery_net is not None
 
         total_loss = torch.tensor(0.0, device=self.device)
         num_layers = 0
@@ -261,11 +267,11 @@ class SynapticTrainer:
 
                         # Encode and reconstruct
                         try:
-                            latent = self.recovery_network.encode(cold_weights)
-                            reconstructed = self.recovery_network(latent)
+                            latent = recovery_net.encode(cold_weights)
+                            _ = recovery_net(latent)
 
                             # Compute cosine similarity loss
-                            loss = self.recovery_network.compute_recovery_loss(
+                            loss = recovery_net.compute_recovery_loss(
                                 cold_weights, latent
                             )
                             total_loss = total_loss + loss
@@ -298,11 +304,11 @@ class SynapticTrainer:
             "hot_params": 0,
             "warm_params": 0,
             "cold_params": 0,
-            "hot_bytes": 0,
-            "warm_bytes": 0,
-            "cold_bytes": 0,
-            "total_bytes": 0,
-            "effective_bytes": 0,
+            "hot_bytes": 0.0,
+            "warm_bytes": 0.0,
+            "cold_bytes": 0.0,
+            "total_bytes": 0.0,
+            "effective_bytes": 0.0,
         }
 
         for layer in self._synaptic_layers:
@@ -409,7 +415,7 @@ class SynapticTrainer:
         """
         from tqdm import tqdm
 
-        history = {
+        history: dict[str, Any] = {
             "train_losses": [],
             "val_losses": [],
             "recovery_losses": [],
@@ -444,7 +450,10 @@ class SynapticTrainer:
 
                 # Update progress bar
                 if batch_idx % log_interval == 0:
-                    avg_loss = sum(epoch_losses[-log_interval:]) / min(log_interval, len(epoch_losses))
+                    avg_loss = (
+                        sum(epoch_losses[-log_interval:]) /
+                        min(log_interval, len(epoch_losses))
+                    )
                     pbar.set_postfix({
                         "loss": f"{avg_loss:.4f}",
                         "recovery": f"{recovery_loss.item():.4f}",
@@ -452,7 +461,10 @@ class SynapticTrainer:
 
             # Epoch statistics
             avg_epoch_loss = sum(epoch_losses) / len(epoch_losses) if epoch_losses else 0.0
-            avg_recovery_loss = sum(epoch_recovery_losses) / len(epoch_recovery_losses) if epoch_recovery_losses else 0.0
+            if epoch_recovery_losses:
+                avg_recovery_loss = sum(epoch_recovery_losses) / len(epoch_recovery_losses)
+            else:
+                avg_recovery_loss = 0.0
             history["train_losses"].append(avg_epoch_loss)
             history["recovery_losses"].append(avg_recovery_loss)
 
@@ -464,11 +476,16 @@ class SynapticTrainer:
             if val_loader is not None:
                 val_loss = self.evaluate(val_loader, loss_fn)
                 history["val_losses"].append(val_loss)
-                print(f"Epoch {epoch+1}: Train Loss={avg_epoch_loss:.4f}, Val Loss={val_loss:.4f}, "
-                      f"Sparsity={compression_stats.get('sparsity', 0):.2%}")
+                print(
+                    f"Epoch {epoch+1}: Train Loss={avg_epoch_loss:.4f}, "
+                    f"Val Loss={val_loss:.4f}, "
+                    f"Sparsity={compression_stats.get('sparsity', 0):.2%}"
+                )
             else:
-                print(f"Epoch {epoch+1}: Train Loss={avg_epoch_loss:.4f}, "
-                      f"Sparsity={compression_stats.get('sparsity', 0):.2%}")
+                print(
+                    f"Epoch {epoch+1}: Train Loss={avg_epoch_loss:.4f}, "
+                    f"Sparsity={compression_stats.get('sparsity', 0):.2%}"
+                )
 
             # Callback
             if callback is not None:
@@ -481,6 +498,9 @@ class SynapticTrainer:
                 if val_loader is not None:
                     epoch_stats["val_loss"] = history["val_losses"][-1]
                 callback(epoch, epoch_stats)
+
+        # Update current_epoch to reflect completed epochs (for reporting)
+        self.current_epoch = num_epochs - 1
 
         return history
 
@@ -513,7 +533,10 @@ class SynapticTrainer:
                     batch = (batch,)
 
                 # Move batch to device
-                batch = tuple(t.to(self.device) if isinstance(t, torch.Tensor) else t for t in batch)
+                batch = tuple(
+                    t.to(self.device) if isinstance(t, torch.Tensor) else t
+                    for t in batch
+                )
 
                 loss = loss_fn(*batch)
                 total_loss += loss.item()
