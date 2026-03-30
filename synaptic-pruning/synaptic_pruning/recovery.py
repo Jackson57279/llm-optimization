@@ -290,14 +290,20 @@ class CodebookVQ(nn.Module):
         original_shape = weights.shape
         flat_weights = self._flatten_inputs(weights)
 
-        # Quantize to get nearest codebook entries
-        with torch.no_grad():
-            distances = torch.sum(
-                (flat_weights.unsqueeze(1) - self.embeddings.unsqueeze(0)) ** 2,
-                dim=2,
-            )
-            indices = torch.argmin(distances, dim=1)
-            quantized_flat = self.embeddings[indices]
+        # Compute distances to all codebook entries
+        # [N, 1, embedding_dim] - [1, num_embeddings, embedding_dim]
+        # -> [N, num_embeddings, embedding_dim] -> sum -> [N, num_embeddings]
+        distances = torch.sum(
+            (flat_weights.unsqueeze(1) - self.embeddings.unsqueeze(0)) ** 2,
+            dim=2,
+        )
+
+        # Find nearest codebook entry for each vector
+        indices = torch.argmin(distances, dim=1)
+
+        # Get quantized vectors from codebook - use embedding lookup
+        # This requires gradients for codebook loss
+        quantized_flat = torch.nn.functional.embedding(indices, self.embeddings)
 
         # Straight-through estimator: use quantized values in forward,
         # but gradients flow to original weights
@@ -308,14 +314,10 @@ class CodebookVQ(nn.Module):
 
         # Compute VQ losses
         # Commitment loss: encourages encoder to commit to codebook entries
-        commitment_loss = torch.mean(
-            (quantized_flat.detach() - flat_weights) ** 2
-        )
+        commitment_loss = torch.mean((quantized_flat.detach() - flat_weights) ** 2)
 
         # Codebook loss: encourages codebook entries to move towards encoder outputs
-        codebook_loss = torch.mean(
-            (quantized_flat - flat_weights.detach()) ** 2
-        )
+        codebook_loss = torch.mean((quantized_flat - flat_weights.detach()) ** 2)
 
         # Combined VQ loss (VQ-VAE style with commitment cost)
         vq_loss = codebook_loss + self.commitment_cost * commitment_loss

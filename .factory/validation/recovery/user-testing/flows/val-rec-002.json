@@ -1,0 +1,11 @@
+{
+  "assertionId": "VAL-REC-002",
+  "status": "pass",
+  "reason": "All 3 cosine similarity and recovery loss tests passed successfully",
+  "testOutput": "tests/test_recovery.py::TestHyperNetwork::test_cosine_similarity_improvement PASSED\ntests/test_recovery.py::TestHyperNetwork::test_recovery_loss_computation PASSED\ntests/test_recovery.py::TestHyperNetwork::test_recovery_loss_range PASSED\n3 passed, 1 warning",
+  "exitCode": 0,
+  "evidenceFiles": [],
+  "frictions": [],
+  "blockers": [],
+  "toolsUsed": ["pytest"]
+}

@@ -1,0 +1,11 @@
+{
+  "assertionId": "VAL-REC-001",
+  "status": "pass",
+  "reason": "All 4 HyperNetwork tests passed successfully",
+  "testOutput": "tests/test_recovery.py::TestHyperNetwork::test_forward_single_latent PASSED\ntests/test_recovery.py::TestHyperNetwork::test_forward_batched_latent PASSED\ntests/test_recovery.py::TestHyperNetwork::test_encode_single_weight PASSED\ntests/test_recovery.py::TestHyperNetwork::test_encode_batched_weights PASSED\n4 passed, 1 warning",
+  "exitCode": 0,
+  "evidenceFiles": [],
+  "frictions": [],
+  "blockers": [],
+  "toolsUsed": ["pytest"]
+}

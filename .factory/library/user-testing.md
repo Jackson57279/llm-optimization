@@ -52,3 +52,22 @@ pytest tests/test_quantization.py::Test4BitQuantization::test_4bit_round_trip_er
 - VAL-QNT-002: 1-bit binary representation -> test_1bit_values_are_binary, test_dequantize_1bit_produces_scaled_values
 - VAL-QNT-003: Tier assignment -> test_tier_assignment_hot_is_fp16, test_tier_assignment_warm_is_4bit, test_tier_assignment_cold_is_1bit
 - VAL-QNT-004: Gradient flow -> test_4bit_gradient_flow, test_1bit_gradient_flow, test_tiered_quantization_gradient_flow
+
+## Recovery Assertion Mapping (VAL-REC-*)
+
+### VAL-REC-001: HyperNetwork Generates Valid Weights
+- `test_hyper_network.py::TestHyperNetwork::test_forward_single_latent`
+- `test_hyper_network.py::TestHyperNetwork::test_forward_batched_latent`
+- `test_hyper_network.py::TestHyperNetwork::test_encode_single_weight`
+- `test_hyper_network.py::TestHyperNetwork::test_encode_batched_weights`
+
+### VAL-REC-002: Recovery Cosine Similarity > 80%
+- `test_hyper_network.py::TestHyperNetwork::test_cosine_similarity_improvement`
+- `test_hyper_network.py::TestHyperNetwork::test_recovery_loss_computation`
+- `test_hyper_network.py::TestHyperNetwork::test_recovery_loss_range`
+
+### VAL-REC-003: CodebookVQ with 256-entry codebook, STE, VQ loss
+- `test_codebook.py::TestCodebookVQ::test_codebook_has_256_entries`
+- `test_codebook.py::TestCodebookVQ::test_vq_loss_computation`
+- `test_codebook.py::TestCodebookVQ::test_straight_through_estimator`
+- `test_codebook.py::TestCodebookVQ::test_quantize_dequantize_roundtrip`
