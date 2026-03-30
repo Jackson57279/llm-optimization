@@ -1,10 +1,10 @@
 commands:
-  install: pip install -e .
-  test: pytest tests/ -v
-  lint: flake8 synaptic_pruning/ tests/ --max-line-length=100
-  typecheck: mypy synaptic_pruning/ --ignore-missing-imports
-  benchmark-gpt2: python benchmarks/train_gpt2_small.py
-  benchmark-perplexity: python benchmarks/evaluate_perplexity.py
-  example: python examples/end_to_end_pipeline.py
+  install: cd synaptic-pruning && pip install -e .
+  test: cd synaptic-pruning && pytest tests/ -v
+  lint: cd synaptic-pruning && flake8 synaptic_pruning/ tests/ --max-line-length=100
+  typecheck: cd synaptic-pruning && mypy synaptic_pruning/ --ignore-missing-imports
+  benchmark-gpt2: cd synaptic-pruning && python benchmarks/train_gpt2_small.py
+  benchmark-perplexity: cd synaptic-pruning && python benchmarks/evaluate_perplexity.py
+  example: cd synaptic-pruning && python examples/end_to_end_pipeline.py
 
 services: {}

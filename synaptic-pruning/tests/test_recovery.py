@@ -5,7 +5,6 @@ This module tests the HyperNetwork recovery implementation, validating:
 - VAL-REC-002: Recovery Cosine Similarity
 """
 
-import pytest
 import torch
 import torch.nn as nn
 
@@ -181,7 +180,6 @@ class TestHyperNetwork:
 
         # Forward pass
         loss = hypernet.compute_recovery_loss(target_weights, latent)
-        initial_loss = loss.item()
 
         # Backward pass
         optimizer.zero_grad()

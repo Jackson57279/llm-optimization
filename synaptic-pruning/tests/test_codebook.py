@@ -7,9 +7,7 @@ This module tests the CodebookVQ implementation, validating:
   * <10% reconstruction error
 """
 
-import pytest
 import torch
-import torch.nn as nn
 
 from synaptic_pruning.recovery import CodebookVQ
 
@@ -175,22 +173,18 @@ class TestCodebookVQCompression:
 
         # Calculate compression ratio
         # Original size: num_vectors * embedding_dim * 4 bytes (float32)
-        original_size = num_vectors * embedding_dim * 4
-
-        # Compressed size: num_vectors * 1 byte (uint8 index) + codebook overhead
-        compressed_size = num_vectors * 1 + (num_embeddings * embedding_dim * 4)
-
-        # For cold weights that are frequently accessed, amortized cost matters
         # Per-vector compression (excluding one-time codebook cost)
         per_vector_original = embedding_dim * 4  # float32 values
         per_vector_compressed = 1  # uint8 index
         compression_ratio = per_vector_original / per_vector_compressed
 
         # Should achieve >10x compression as specified
-        assert compression_ratio > 10, f"Compression ratio {compression_ratio:.1f}x is not > 10x"
+        assert compression_ratio > 10, \
+            f"Compression ratio {compression_ratio:.1f}x is not > 10x"
 
         # With 256-dim vectors, we get exactly 16x
-        assert compression_ratio == 1024, f"Expected 1024x for 256-dim vectors, got {compression_ratio:.1f}x"
+        assert compression_ratio == 1024, \
+            f"Expected 1024x for 256-dim vectors, got {compression_ratio:.1f}x"
 
     def test_reconstruction_error_within_tolerance(self):
         """Test reconstruction error is within 10%.

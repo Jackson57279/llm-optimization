@@ -95,7 +95,7 @@ class SynapticTrainer:
             "SynapticTrainer will be implemented in training-synaptic-trainer"
         )
 
-    def save_checkpoint(self, path: str, epoch: int, **kwargs) -> None:
+    def save_checkpoint(self, path: str, epoch: int, **kwargs: Any) -> None:
         """Save training checkpoint.
 
         Args:

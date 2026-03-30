@@ -97,7 +97,7 @@ class HyperNetwork(nn.Module):
         else:
             weights = weights_flat.view(batch_size, *self.target_shape)
 
-        return weights
+        return weights  # type: ignore[no-any-return]
 
     def encode(self, weights: torch.Tensor) -> torch.Tensor:
         """Encode weight matrix to latent code.
@@ -125,7 +125,7 @@ class HyperNetwork(nn.Module):
         if squeeze_output:
             latent = latent.squeeze(0)
 
-        return latent
+        return latent  # type: ignore[no-any-return]
 
     def compute_recovery_loss(
         self, original_weights: torch.Tensor, latent_code: torch.Tensor
@@ -235,7 +235,7 @@ class CodebookVQ(nn.Module):
         """
         original_shape = weights.shape
         flat_weights = self._flatten_inputs(weights)
-        
+
         # Compute distances to all codebook entries
         # [N, 1, embedding_dim] - [1, num_embeddings, embedding_dim]
         # -> [N, num_embeddings, embedding_dim] -> sum -> [N, num_embeddings]

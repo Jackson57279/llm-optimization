@@ -78,7 +78,7 @@ def plot_activity_histogram(
     if not all_scores:
         raise ValueError("No valid activity scores to plot.")
 
-    all_scores = np.concatenate(all_scores)
+    all_scores = np.concatenate(all_scores)  # type: ignore[assignment]
 
     # Create figure if needed
     if ax is None:
@@ -162,16 +162,16 @@ def plot_tier_distribution(
         params_to_plot = all_params
 
     # Get tier counts for each parameter
-    hot_counts = []
-    warm_counts = []
-    cold_counts = []
-    total_counts = []
+    hot_counts: list[float] = []
+    warm_counts: list[float] = []
+    cold_counts: list[float] = []
+    total_counts: list[float] = []
 
     for param_name in params_to_plot:
         hot, warm, cold = activity_tracker.get_tier_counts(param_name)
-        hot_counts.append(hot)
-        warm_counts.append(warm)
-        cold_counts.append(cold)
+        hot_counts.append(float(hot))
+        warm_counts.append(float(warm))
+        cold_counts.append(float(cold))
         total_counts.append(hot + warm + cold)
 
     # Normalize if requested
@@ -492,7 +492,7 @@ def save_visualization(
         raise ValueError(f"Unsupported output format. Supported: {', '.join(valid_extensions)}")
 
     # Save the figure
-    fig.savefig(output_path, dpi=dpi, bbox_inches=bbox_inches)
+    fig.savefig(output_path, dpi=dpi, bbox_inches=bbox_inches)  # type: ignore[union-attr]
 
 
 def _validate_image_file(file_path: str) -> bool:

@@ -75,7 +75,7 @@ def plot_layer_heatmap(
     )
 
 
-def replace_linear_with_synaptic(model: nn.Module, **synaptic_kwargs) -> nn.Module:
+def replace_linear_with_synaptic(model: nn.Module, **synaptic_kwargs: Any) -> nn.Module:
     """Replace all nn.Linear layers with SynapticLayers.
 
     Args:
