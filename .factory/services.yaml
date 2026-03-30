@@ -1,0 +1,10 @@
+commands:
+  install: pip install -e .
+  test: pytest tests/ -v
+  lint: flake8 synaptic_pruning/ tests/ --max-line-length=100
+  typecheck: mypy synaptic_pruning/ --ignore-missing-imports
+  benchmark-gpt2: python benchmarks/train_gpt2_small.py
+  benchmark-perplexity: python benchmarks/evaluate_perplexity.py
+  example: python examples/end_to_end_pipeline.py
+
+services: {}
