@@ -347,9 +347,8 @@ def train_model(
 
     step = 0
     for epoch in range(num_epochs):
-        # Update pruning thresholds
-        effective_step = epoch * (len(samples) // batch_size)
-        trainer._update_activity_thresholds(effective_step)
+        # Update pruning thresholds - pass epoch number, not step
+        trainer._update_activity_thresholds(epoch)
 
         epoch_losses = []
 

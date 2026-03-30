@@ -5,6 +5,7 @@ commands:
   typecheck: cd synaptic-pruning && mypy synaptic_pruning/ --ignore-missing-imports
   benchmark-gpt2: cd synaptic-pruning && python benchmarks/train_gpt2_small.py
   benchmark-perplexity: cd synaptic-pruning && python benchmarks/evaluate_perplexity.py
+  benchmark-ablation: cd synaptic-pruning && python benchmarks/ablation_pruning.py
   example: cd synaptic-pruning && python examples/end_to_end_pipeline.py
 
 services: {}
