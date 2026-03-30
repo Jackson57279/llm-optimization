@@ -288,7 +288,7 @@ class TestPlotActivitySummary:
     def test_with_output_path(self, sample_tracker, temp_dir):
         """VAL-ACT-003: Test saving to file creates valid PNG."""
         output_path = os.path.join(temp_dir, "summary.png")
-        fig = plot_activity_summary(sample_tracker, output_path=output_path)
+        plot_activity_summary(sample_tracker, output_path=output_path)
 
         assert os.path.exists(output_path)
         assert os.path.getsize(output_path) > 0
@@ -418,7 +418,7 @@ class TestValidateImageFile:
     def test_empty_file(self, temp_dir):
         """Test validation of empty file."""
         output_path = os.path.join(temp_dir, "empty.png")
-        with open(output_path, "w") as f:
+        with open(output_path, "w"):
             pass  # Create empty file
 
         assert not _validate_image_file(output_path)

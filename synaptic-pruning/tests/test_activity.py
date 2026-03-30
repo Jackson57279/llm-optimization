@@ -233,16 +233,16 @@ class TestTierClassification:
         hot_mask, warm_mask, cold_mask = tracker.get_tier_mask("weight1")
 
         # Check hot weights
-        assert hot_mask[0].item() == True
-        assert hot_mask[3].item() == True
+        assert hot_mask[0].item() is True
+        assert hot_mask[3].item() is True
 
         # Check warm weights
-        assert warm_mask[1].item() == True
-        assert warm_mask[4].item() == True
+        assert warm_mask[1].item() is True
+        assert warm_mask[4].item() is True
 
         # Check cold weights
-        assert cold_mask[2].item() == True
-        assert cold_mask[5].item() == True
+        assert cold_mask[2].item() is True
+        assert cold_mask[5].item() is True
 
     def test_tier_counts_correct(self):
         """VAL-ACT-002: Tier counts match expected values."""
@@ -302,10 +302,10 @@ class TestTierClassification:
 
         hot_mask, warm_mask, cold_mask = tracker.get_tier_mask("weight1")
 
-        assert hot_mask[1].item() == True  # 0.81 > 0.8
-        assert warm_mask[0].item() == True  # 0.8 is not > 0.8, but > 0.3
-        assert warm_mask[3].item() == True  # 0.31 > 0.3 and <= 0.8
-        assert cold_mask[2].item() == True  # 0.3 is not > 0.3
+        assert hot_mask[1].item() is True  # 0.81 > 0.8
+        assert warm_mask[0].item() is True  # 0.8 is not > 0.8, but > 0.3
+        assert warm_mask[3].item() is True  # 0.31 > 0.3 and <= 0.8
+        assert cold_mask[2].item() is True  # 0.3 is not > 0.3
 
 
 class TestActivityAccess:

@@ -5,11 +5,8 @@ covering 4-bit and 1-bit quantization, round-trip error validation,
 tier assignment, and STE gradient flow.
 """
 
-import math
-
 import pytest
 import torch
-import torch.nn.functional as F
 
 from synaptic_pruning.quantization import TieredQuantizer
 
@@ -105,8 +102,6 @@ class Test4BitQuantization:
         # Symmetric weights around 0
         weights = torch.linspace(-1, 1, 16)
         quantized, scale, _ = quantizer.quantize_4bit(weights)
-        # Should be symmetric around 0
-        center_idx = len(weights) // 2
         assert quantized[0] == -quantized[-1]
 
     def test_4bit_with_provided_scale(self):

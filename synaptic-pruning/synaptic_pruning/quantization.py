@@ -13,18 +13,18 @@ import torch
 
 class _STEQuantize(torch.autograd.Function):
     """Straight-Through Estimator for quantization.
-    
+
     Forward pass: apply quantization function
     Backward pass: pass gradients straight through (identity)
-    
+
     This connects the quantized output back to the input weights
     for proper gradient flow during training.
     """
-    
+
     @staticmethod
-    def forward(ctx, x, quantized):
+    def forward(ctx: Any, x: torch.Tensor, quantized: torch.Tensor) -> torch.Tensor:
         """Forward pass returns quantized values.
-        
+
         Args:
             ctx: Context for saving tensors for backward
             x: Original input tensor (for gradient flow)
@@ -32,9 +32,9 @@ class _STEQuantize(torch.autograd.Function):
         """
         ctx.save_for_backward(x)
         return quantized
-    
+
     @staticmethod
-    def backward(ctx, grad_output):
+    def backward(ctx: Any, grad_output: torch.Tensor) -> tuple[torch.Tensor | None, None]:
         """Backward pass passes gradients straight through to original input."""
         (x,) = ctx.saved_tensors
         # Pass gradients straight through
@@ -43,20 +43,20 @@ class _STEQuantize(torch.autograd.Function):
 
 class _STEDequantize(torch.autograd.Function):
     """Straight-Through Estimator for dequantization.
-    
+
     Forward pass: apply dequantization
     Backward pass: pass gradients straight through
     """
-    
+
     @staticmethod
-    def forward(ctx, x):
+    def forward(ctx: Any, x: torch.Tensor) -> torch.Tensor:
         """Forward pass returns dequantized values."""
         return x
-    
+
     @staticmethod
-    def backward(ctx, grad_output):
+    def backward(ctx: Any, grad_output: torch.Tensor) -> tuple[torch.Tensor | None]:
         """Backward pass passes gradients straight through."""
-        return grad_output
+        return (grad_output,)
 
 
 class TieredQuantizer:
@@ -107,8 +107,8 @@ class TieredQuantizer:
         return weights
 
     def quantize_4bit(
-        self, 
-        weights: torch.Tensor, 
+        self,
+        weights: torch.Tensor,
         scale: torch.Tensor | None = None,
         param_name: str | None = None,
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
@@ -123,7 +123,7 @@ class TieredQuantizer:
             param_name: Optional parameter name for storing scale.
 
         Returns:
-            Tuple of (quantized_int8, scale, quantized_with_ste). 
+            Tuple of (quantized_int8, scale, quantized_with_ste).
             - quantized_int8: int8 storage for serialization
             - scale: quantization scale
             - quantized_with_ste: differentiable tensor with STE applied
@@ -138,7 +138,7 @@ class TieredQuantizer:
                 scale = torch.tensor(1.0, device=weights.device, dtype=weights.dtype)
         else:
             scale = scale.to(weights.device, weights.dtype)
-        
+
         # Quantize: round to nearest 4-bit level
         # Map weights to [-7, 7] range
         normalized = weights / scale
@@ -148,15 +148,15 @@ class TieredQuantizer:
         quantized_float = torch.round(normalized)
         # Convert to int8 for storage
         quantized_int = quantized_float.to(torch.int8)
-        
+
         # Apply STE to create differentiable version
         # This connects quantized values back to original weights
         quantized_with_ste = _STEQuantize.apply(weights, quantized_float * scale)
-        
+
         # Store scale for this parameter
         if param_name is not None:
             self.scales[param_name] = scale.detach().clone()
-        
+
         return quantized_int, scale, quantized_with_ste
 
     def dequantize_4bit(self, quantized: torch.Tensor, scale: torch.Tensor) -> torch.Tensor:
@@ -173,14 +173,14 @@ class TieredQuantizer:
         if quantized.dtype != torch.int8:
             # Already dequantized with STE - just return
             return quantized
-        
+
         # Convert from int8 to float and multiply by scale
         weights_float = quantized.to(torch.float32) * scale
         return weights_float
 
     def quantize_1bit(
-        self, 
-        weights: torch.Tensor, 
+        self,
+        weights: torch.Tensor,
         scale: torch.Tensor | None = None,
         param_name: str | None = None,
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
@@ -194,7 +194,7 @@ class TieredQuantizer:
             param_name: Optional parameter name for storing scale.
 
         Returns:
-            Tuple of (quantized_int8, scale, quantized_with_ste). 
+            Tuple of (quantized_int8, scale, quantized_with_ste).
             - quantized_int8: int8 storage with values -1 or +1
             - scale: quantization scale
             - quantized_with_ste: differentiable tensor with STE applied
@@ -209,24 +209,24 @@ class TieredQuantizer:
                 scale = torch.tensor(1.0, device=weights.device, dtype=weights.dtype)
         else:
             scale = scale.to(weights.device, weights.dtype)
-        
+
         # Binary quantization: sign of weight
         # Returns -1 or +1
         binary_float = torch.sign(weights)
         # Handle zeros - map to +1
         binary_float[binary_float == 0] = 1.0
-        
+
         # Convert to int8 for storage
         quantized_int = binary_float.to(torch.int8)
-        
+
         # Apply STE to create differentiable version
         # This connects quantized values back to original weights
         quantized_with_ste = _STEQuantize.apply(weights, binary_float * scale)
-        
+
         # Store scale for this parameter
         if param_name is not None:
             self.scales[param_name] = scale.detach().clone()
-        
+
         return quantized_int, scale, quantized_with_ste
 
     def dequantize_1bit(self, quantized: torch.Tensor, scale: torch.Tensor) -> torch.Tensor:
@@ -243,7 +243,7 @@ class TieredQuantizer:
         if quantized.dtype != torch.int8:
             # Already dequantized with STE - just return
             return quantized
-        
+
         # Convert from int8 to float and multiply by scale
         weights_float = quantized.to(torch.float32) * scale
         return weights_float
@@ -272,16 +272,16 @@ class TieredQuantizer:
         hot_mask = activity > self.hot_threshold
         warm_mask = (activity > self.warm_threshold) & ~hot_mask
         cold_mask = ~hot_mask & ~warm_mask
-        
+
         # Initialize result tensor
         result = torch.zeros_like(weights)
-        
+
         # Process hot weights (FP16 - no quantization)
         if hot_mask.any():
             hot_weights = weights[hot_mask]
             hot_quantized = self.quantize_fp16(hot_weights)
             result = result.masked_scatter(hot_mask, hot_quantized)
-        
+
         # Process warm weights (4-bit)
         warm_scale = None
         if warm_mask.any():
@@ -289,7 +289,7 @@ class TieredQuantizer:
             # Use the STE-enabled quantized version directly
             _, warm_scale, warm_dequantized = self.quantize_4bit(warm_weights)
             result = result.masked_scatter(warm_mask, warm_dequantized)
-        
+
         # Process cold weights (1-bit)
         cold_scale = None
         if cold_mask.any():
@@ -297,7 +297,7 @@ class TieredQuantizer:
             # Use the STE-enabled quantized version directly
             _, cold_scale, cold_dequantized = self.quantize_1bit(cold_weights)
             result = result.masked_scatter(cold_mask, cold_dequantized)
-        
+
         # Build metadata
         metadata = {
             "hot_mask": hot_mask,
@@ -308,7 +308,7 @@ class TieredQuantizer:
                 "cold": cold_scale,
             },
         }
-        
+
         return result, metadata
 
     def reset(self) -> None:
