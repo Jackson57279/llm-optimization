@@ -1,0 +1,9 @@
+{
+  "featureId": "benchmark-ablation-study",
+  "status": "pass",
+  "issues": [],
+  "sharedStateObservations": [
+    "RandomPruningLayer extends SynapticLayer with random tier assignment for ablation studies",
+    "Activity-driven pruning consistently achieves 15-25% better loss than random at same sparsity level"
+  ]
+}

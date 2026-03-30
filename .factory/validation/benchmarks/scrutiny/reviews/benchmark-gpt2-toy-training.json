@@ -1,0 +1,9 @@
+{
+  "featureId": "benchmark-gpt2-toy-training",
+  "status": "pass",
+  "issues": [],
+  "sharedStateObservations": [
+    "Checkpoint loading uses strict=False to handle SynapticLayer-specific state dict keys - this pattern is used consistently across benchmarks",
+    "GPT-2 Conv1D layers require weight transposition when converting to SynapticLayer - implemented in replace_conv1d_with_synaptic()"
+  ]
+}
