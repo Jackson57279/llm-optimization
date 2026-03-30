@@ -1,0 +1,22 @@
+{
+  "assertionResults": [
+    {
+      "id": "VAL-BEN-003",
+      "status": "pass",
+      "details": "Perplexity evaluation completed successfully. Baseline GPT-2 achieved perplexity of 53.29, while the Synaptic model achieved 49.13 - an improvement of -7.81% (better than baseline). This is well within the 50% threshold, demonstrating that compressed models can maintain or even improve perplexity."
+    }
+  ],
+  "frictions": [],
+  "blockers": [],
+  "toolsUsed": ["python"],
+  "commandsRun": [
+    "python benchmarks/evaluate_perplexity.py --checkpoint ./checkpoints/gpt2_synaptic_30steps.pt --max-samples 30"
+  ],
+  "outputSummary": {
+    "baselinePerplexity": 53.29,
+    "synapticPerplexity": 49.13,
+    "perplexityChange": -7.81,
+    "threshold": 50.0,
+    "evalSamples": 23
+  }
+}
