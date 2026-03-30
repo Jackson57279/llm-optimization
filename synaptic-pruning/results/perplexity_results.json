@@ -1,0 +1,46 @@
+{
+  "baseline": {
+    "model_name": "gpt2",
+    "parameters": 124439808,
+    "perplexity": 49.96786467495862,
+    "loss": 3.911380092302958,
+    "num_samples": 6
+  },
+  "synaptic": {
+    "checkpoint": "./checkpoints/gpt2_synaptic_20steps.pt",
+    "parameters": 163037184,
+    "num_synaptic_layers": 49,
+    "perplexity": 47.64990679402656,
+    "loss": 3.863880674044291,
+    "num_samples": 6,
+    "compression_stats": {
+      "total_params": 123532032,
+      "hot_params": 0,
+      "warm_params": 0,
+      "cold_params": 0,
+      "hot_bytes": 0,
+      "warm_bytes": 0,
+      "cold_bytes": 0,
+      "total_bytes": 0,
+      "sparsity": 0.0,
+      "effective_compression": 1.0
+    },
+    "checkpoint_info": {
+      "path": "./checkpoints/gpt2_synaptic_20steps.pt",
+      "current_step": 0,
+      "current_epoch": 0
+    }
+  },
+  "comparison": {
+    "baseline_perplexity": 49.96786467495862,
+    "synaptic_perplexity": 47.64990679402656,
+    "perplexity_increase_ratio": 0.9536110278874154,
+    "perplexity_increase_percent": -4.638897211258459,
+    "threshold": 0.5,
+    "threshold_percent": 50.0
+  },
+  "validation": {
+    "val_ben_003": "passed",
+    "message": "Perplexity within 50% of baseline"
+  }
+}

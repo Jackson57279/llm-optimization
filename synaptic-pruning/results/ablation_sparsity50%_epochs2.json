@@ -1,0 +1,48 @@
+{
+  "config": {
+    "model_name": "gpt2",
+    "target_sparsity": 0.5,
+    "num_epochs": 2,
+    "num_samples": 20,
+    "batch_size": 4,
+    "learning_rate": 5e-05,
+    "random_seed": 42
+  },
+  "activity_driven": {
+    "final_loss": 11.338606655597687,
+    "perplexity": Infinity,
+    "compression_stats": {
+      "total_params": 123532032,
+      "sparsity": 0.9999803775590771,
+      "effective_compression": 15.999057142231779,
+      "hot_params": 1,
+      "warm_params": 2423,
+      "cold_params": 123529608
+    }
+  },
+  "random": {
+    "final_loss": 3.878419190645218,
+    "perplexity": 46.93208126233105,
+    "compression_stats": {
+      "total_params": 123532032,
+      "sparsity": 0.9998812291859653,
+      "effective_compression": 15.994020434798962,
+      "hot_params": 181,
+      "warm_params": 14491,
+      "cold_params": 123517360
+    }
+  },
+  "comparison": {
+    "loss_difference": -7.460187464952469,
+    "loss_improvement_percent": -192.35124153022213,
+    "perplexity_difference": -Infinity,
+    "perplexity_improvement_percent": -Infinity,
+    "sparsity_difference": 9.914837311175706e-05,
+    "activity_wins_loss": false,
+    "activity_wins_perplexity": false
+  },
+  "validation": {
+    "val_ben_004": "partial",
+    "message": "Results inconclusive - consider longer training"
+  }
+}
