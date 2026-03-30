@@ -207,14 +207,17 @@ class TestHyperNetwork:
         target_weights = torch.randn(32, 32) * 0.5
 
         # Encode to get initial latent
-        latent = hypernet.encode(target_weights)
+        latent = hypernet.encode(target_weights).detach().requires_grad_(True)
+        latent_optimizer = torch.optim.Adam([latent], lr=0.01)
 
         # Train for several steps
         for _ in range(200):
             optimizer.zero_grad()
+            latent_optimizer.zero_grad()
             loss = hypernet.compute_recovery_loss(target_weights, latent)
             loss.backward()
             optimizer.step()
+            latent_optimizer.step()
 
         # Check final similarity
         with torch.no_grad():

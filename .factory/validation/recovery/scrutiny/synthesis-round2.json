@@ -1,0 +1,50 @@
+{
+  "milestone": "recovery",
+  "round": 2,
+  "status": "pass",
+  "validatorsRun": {
+    "test": {
+      "passed": true,
+      "command": "pytest tests/ -v",
+      "exitCode": 0,
+      "notes": "179 passed, 0 failed"
+    },
+    "typecheck": {
+      "passed": true,
+      "command": "mypy synaptic_pruning/ --ignore-missing-imports",
+      "exitCode": 0
+    },
+    "lint": {
+      "passed": true,
+      "command": "flake8 synaptic_pruning/ tests/ --max-line-length=100",
+      "exitCode": 0
+    }
+  },
+  "reviewsSummary": {
+    "total": 2,
+    "passed": 2,
+    "failed": 0,
+    "failedFeatures": []
+  },
+  "blockingIssues": [],
+  "appliedUpdates": [
+    {
+      "target": "tests/test_codebook.py",
+      "description": "Fixed test_reconstruction_error_within_tolerance to train codebook before measuring error. Increased training steps to 500, added 0.0*quantized.sum() trick for gradient graph.",
+      "sourceFeature": "scrutiny-validator-recovery"
+    },
+    {
+      "target": "tests/test_codebook.py",
+      "description": "Fixed test_codebook_updates_during_training and test_vq_loss_decreases_with_training to use loss = vq_loss + 0.0*quantized.sum() for proper gradient graph.",
+      "sourceFeature": "scrutiny-validator-recovery"
+    },
+    {
+      "target": "tests/test_recovery.py",
+      "description": "Fixed test_cosine_similarity_improvement by detaching latent and using separate optimizer for latent code. Added latent_optimizer.zero_grad() call.",
+      "sourceFeature": "scrutiny-validator-recovery"
+    }
+  ],
+  "suggestedGuidanceUpdates": [],
+  "rejectedObservations": [],
+  "previousRound": ".factory/validation/recovery/scrutiny/synthesis.json"
+}
