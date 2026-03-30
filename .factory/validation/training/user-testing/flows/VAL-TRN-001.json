@@ -1,0 +1,17 @@
+{
+  "assertionId": "VAL-TRN-001",
+  "status": "pass",
+  "testMethod": "pytest",
+  "testsExecuted": [
+    "test_trainer_initializes_with_model_and_optimizer",
+    "test_trainer_discovers_synaptic_layers",
+    "test_trainer_with_custom_schedule",
+    "test_trainer_with_recovery_network",
+    "test_trainer_device_handling",
+    "test_invalid_recovery_weight_raises"
+  ],
+  "frictions": [],
+  "blockers": [],
+  "toolsUsed": ["pytest"],
+  "duration": "~5s"
+}

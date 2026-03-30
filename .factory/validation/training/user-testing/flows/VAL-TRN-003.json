@@ -1,0 +1,19 @@
+{
+  "assertionId": "VAL-TRN-003",
+  "status": "pass",
+  "testMethod": "pytest",
+  "testsExecuted": [
+    "test_train_completes_without_errors",
+    "test_loss_decreases_during_training",
+    "test_compression_stats_tracked",
+    "test_validation_evaluation",
+    "test_callback_invoked",
+    "test_single_batch_training",
+    "test_large_batch_size",
+    "test_model_without_synaptic_layers"
+  ],
+  "frictions": [],
+  "blockers": [],
+  "toolsUsed": ["pytest"],
+  "duration": "~15s"
+}

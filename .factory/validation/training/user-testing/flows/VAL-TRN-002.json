@@ -1,0 +1,19 @@
+{
+  "assertionId": "VAL-TRN-002",
+  "status": "pass",
+  "testMethod": "pytest",
+  "testsExecuted": [
+    "test_linear_schedule_increases_sparsity",
+    "test_exponential_schedule_faster_pruning",
+    "test_stepped_schedule_at_milestones",
+    "test_cosine_schedule_smooth_curve",
+    "test_warmup_period_no_pruning",
+    "test_invalid_sparsity_raises",
+    "test_pruning_thresholds_updated_during_training",
+    "test_sparsity_increases_with_schedule"
+  ],
+  "frictions": [],
+  "blockers": [],
+  "toolsUsed": ["pytest"],
+  "duration": "~10s"
+}

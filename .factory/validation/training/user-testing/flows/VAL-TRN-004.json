@@ -1,0 +1,14 @@
+{
+  "assertionId": "VAL-TRN-004",
+  "status": "pass",
+  "testMethod": "pytest",
+  "testsExecuted": [
+    "test_recovery_loss_computed_when_network_provided",
+    "test_recovery_loss_zero_without_network",
+    "test_recovery_network_receives_gradients"
+  ],
+  "frictions": [],
+  "blockers": [],
+  "toolsUsed": ["pytest"],
+  "duration": "~5s"
+}
