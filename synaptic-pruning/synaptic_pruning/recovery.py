@@ -183,7 +183,44 @@ class CodebookVQ(nn.Module):
             embedding_dim: Dimension of each codebook vector.
             commitment_cost: Commitment cost for VQ-VAE style training.
         """
-        raise NotImplementedError("CodebookVQ will be implemented in recovery-codebook-vq")
+        super().__init__()
+        self.num_embeddings = num_embeddings
+        self.embedding_dim = embedding_dim
+        self.commitment_cost = commitment_cost
+
+        # Initialize codebook embeddings
+        self.embeddings = nn.Parameter(
+            torch.randn(num_embeddings, embedding_dim)
+        )
+
+        # Initialize with small normal distribution for stability
+        nn.init.normal_(self.embeddings, mean=0.0, std=0.1)
+
+    def _flatten_inputs(self, weights: torch.Tensor) -> torch.Tensor:
+        """Flatten all dimensions except the last (embedding dim).
+
+        Args:
+            weights: Input tensor of shape [..., embedding_dim].
+
+        Returns:
+            Flattened tensor of shape [N, embedding_dim].
+        """
+        # Keep the last dimension (embedding_dim), flatten all others
+        return weights.view(-1, self.embedding_dim)
+
+    def _unflatten_outputs(
+        self, flat_outputs: torch.Tensor, original_shape: torch.Size
+    ) -> torch.Tensor:
+        """Reshape outputs back to original shape.
+
+        Args:
+            flat_outputs: Flattened tensor [N, embedding_dim].
+            original_shape: Original shape of weights [..., embedding_dim].
+
+        Returns:
+            Reshaped tensor matching original shape.
+        """
+        return flat_outputs.view(original_shape)
 
     def quantize(self, weights: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """Quantize weight vectors using codebook.
@@ -193,8 +230,31 @@ class CodebookVQ(nn.Module):
 
         Returns:
             Tuple of (quantized_weights, indices).
+                - quantized_weights: [..., embedding_dim]
+                - indices: [...] (codebook indices)
         """
-        raise NotImplementedError("CodebookVQ will be implemented in recovery-codebook-vq")
+        original_shape = weights.shape
+        flat_weights = self._flatten_inputs(weights)
+        
+        # Compute distances to all codebook entries
+        # [N, 1, embedding_dim] - [1, num_embeddings, embedding_dim]
+        # -> [N, num_embeddings, embedding_dim] -> sum -> [N, num_embeddings]
+        distances = torch.sum(
+            (flat_weights.unsqueeze(1) - self.embeddings.unsqueeze(0)) ** 2,
+            dim=2,
+        )
+
+        # Find nearest codebook entry for each vector
+        indices = torch.argmin(distances, dim=1)
+
+        # Get quantized vectors from codebook
+        quantized_flat = self.embeddings[indices]
+
+        # Reshape back to original shape
+        quantized_weights = self._unflatten_outputs(quantized_flat, original_shape)
+        indices_reshaped = indices.view(original_shape[:-1])
+
+        return quantized_weights, indices_reshaped
 
     def dequantize(self, indices: torch.Tensor) -> torch.Tensor:
         """Dequantize indices back to weight vectors.
@@ -205,15 +265,59 @@ class CodebookVQ(nn.Module):
         Returns:
             Dequantized weight vectors [..., embedding_dim].
         """
-        raise NotImplementedError("CodebookVQ will be implemented in recovery-codebook-vq")
+        # Flatten indices, lookup, then reshape
+        flat_indices = indices.view(-1)
+        flat_outputs = self.embeddings[flat_indices]
+
+        # Reshape to [..., embedding_dim]
+        output_shape = indices.shape + (self.embedding_dim,)
+        return flat_outputs.view(output_shape)
 
     def forward(self, weights: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """Forward pass with quantization and straight-through estimator.
 
+        Uses straight-through estimator to allow gradients to flow through
+        the quantization operation. Also computes VQ loss for codebook training.
+
         Args:
-            weights: Input weight vectors.
+            weights: Input weight vectors [..., embedding_dim].
 
         Returns:
             Tuple of (quantized_weights, vq_loss).
+                - quantized_weights: Quantized weights with STE [..., embedding_dim]
+                - vq_loss: VQ loss for codebook commitment
         """
-        raise NotImplementedError("CodebookVQ will be implemented in recovery-codebook-vq")
+        original_shape = weights.shape
+        flat_weights = self._flatten_inputs(weights)
+
+        # Quantize to get nearest codebook entries
+        with torch.no_grad():
+            distances = torch.sum(
+                (flat_weights.unsqueeze(1) - self.embeddings.unsqueeze(0)) ** 2,
+                dim=2,
+            )
+            indices = torch.argmin(distances, dim=1)
+            quantized_flat = self.embeddings[indices]
+
+        # Straight-through estimator: use quantized values in forward,
+        # but gradients flow to original weights
+        quantized_flat_ste = flat_weights + (quantized_flat - flat_weights).detach()
+
+        # Reshape
+        quantized_weights = self._unflatten_outputs(quantized_flat_ste, original_shape)
+
+        # Compute VQ losses
+        # Commitment loss: encourages encoder to commit to codebook entries
+        commitment_loss = torch.mean(
+            (quantized_flat.detach() - flat_weights) ** 2
+        )
+
+        # Codebook loss: encourages codebook entries to move towards encoder outputs
+        codebook_loss = torch.mean(
+            (quantized_flat - flat_weights.detach()) ** 2
+        )
+
+        # Combined VQ loss (VQ-VAE style with commitment cost)
+        vq_loss = codebook_loss + self.commitment_cost * commitment_loss
+
+        return quantized_weights, vq_loss
