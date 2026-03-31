@@ -1,0 +1,46 @@
+======================================================================
+SYNAPTIC PRUNING BENCHMARK RESULTS SUMMARY
+======================================================================
+
+VAL-CROSS-003: Baseline Comparison
+----------------------------------------
+Model: gpt2
+Baseline FP16: PPL=49.16
+
+Synaptic Pruning Results:
+  Sparsity 0%: Compression=16.0×, PPL=inf
+  Sparsity 50%: Compression=16.0×, PPL=inf
+
+GPTQ Results:
+  4bit: Compression=4.0×, PPL=1021.24
+
+AWQ Results:
+  4bit: Compression=4.0×, PPL=inf
+
+VAL-CROSS-002: Task-Shift Recovery
+----------------------------------------
+Task A: 0 → Task B: 1
+Task A Final Accuracy: 12.00%
+Task B Before Recovery: 9.00%
+Task B After Recovery: 11.50%
+Accuracy Improvement: +2.50%
+Final Compression: 16.0×
+
+VAL-BEN-004: Ablation Study (50% Sparsity, 2 Epochs)
+----------------------------------------
+Activity-Driven: Loss=11.3386, PPL=inf
+Random Pruning:  Loss=3.8784, PPL=46.93
+
+VAL-BEN-004: Ablation Study (70% Sparsity, 3 Epochs)
+----------------------------------------
+Activity-Driven: Loss=9.2269, PPL=8072.85
+Random Pruning:  Loss=25.7061, PPL=inf
+
+======================================================================
+Generated Graphs:
+  - task_shift_recovery_curves.png
+  - ablation_comparison.png
+  - method_comparison_detailed.png
+  - parameter_breakdown.png
+  - pareto_frontier.png (existing)
+======================================================================
